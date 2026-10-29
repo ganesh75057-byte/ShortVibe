@@ -1,0 +1,3997 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ShortVibe</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: #101014;
+      color: white;
+      font-family: Arial, sans-serif;
+    }
+
+    header {
+      padding: 18px;
+      background: #20202a;
+      color: #ff3867;
+      font-size: 26px;
+      font-weight: bold;
+    }
+
+    main {
+      max-width: 600px;
+      margin: auto;
+      padding: 15px;
+    }
+
+    .panel {
+      background: #22222c;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    input, button {
+      display: block;
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border: 0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    input {
+      background: #f4f4f5;
+      color: #111;
+    }
+
+    button {
+      background: #ff3867;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #414153;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+    }
+
+    .hidden { display: none !important; }
+
+    .muted {
+      color: #c5c5d0;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .caption { overflow-wrap: anywhere; }
+
+    #message {
+      overflow-wrap: anywhere;
+      line-height: 1.5;
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      max-height: 65vh;
+      background: black;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    hr { border-color: #414153; }
+
+/* Instagram jaisa Comments panel */
+
+.comments-section {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 70vh;
+  max-height: 70vh;
+  box-sizing: border-box;
+  background: #24242c;
+  color: white;
+  padding: 18px 16px 10px;
+  border-radius: 22px 22px 0 0;
+  z-index: 9999;
+  box-shadow: 0 -5px 25px rgba(0,0,0,0.3);
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  transform: translateY(100%);
+  visibility: hidden;
+  transition: transform 0.3s ease, visibility 0.3s ease;
+}
+
+.comments-section.open {
+  transform: translateY(0);
+  visibility: visible;
+}
+
+#commentsBox {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.comment-input-area {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid #444;
+  background: #24242c;
+}
+
+.comment-input-area input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border-radius: 22px;
+  background: #33333d;
+  color: white;
+  font-size: 16px;
+}
+
+.comment-input-area button {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  background: #2563eb;
+  color: white;
+  border-radius: 20px;
+}
+
+
+.comments-section.open {
+  transform: translateY(0);
+  visibility: visible;
+}
+
+/* Comments panel: neeche fixed input aur upar scroll hone wale comments */
+.comments-section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Comments list scroll hogi */
+#commentsBox {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding-bottom: 12px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Comment likhne ka box neeche rahega */
+.comment-input-area {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+  padding: 10px 0;
+  border-top: 1px solid #444;
+  background: #24242c;
+}
+
+.comment-input-area input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #555;
+  border-radius: 22px;
+  background: #33333d;
+  color: white;
+  font-size: 16px;
+}
+
+.comment-input-area button {
+  flex-shrink: 0;
+  padding: 10px 14px;
+  border-radius: 20px;
+  background: #2563eb;
+  color: white;
+}
+
+.comment-input-area {
+  display: flex !important;
+  flex-shrink: 0;
+  width: 100%;
+  gap: 8px;
+  padding: 12px 0;
+  background: #24242c;
+  position: relative;
+  z-index: 10000;
+}
+
+.comment-input-area input {
+  display: block !important;
+  flex: 1;
+  min-width: 0;
+  color: white;
+  background: #33333d;
+  border: 1px solid #888;
+  border-radius: 20px;
+  padding: 12px;
+  font-size: 16px;
+}
+
+.comment-input-area button {
+  display: block !important;
+  color: white;
+  background: #2563eb;
+  padding: 10px;
+  border-radius: 20px;
+}
+
+/* Comment box ko mobile par bada karein */
+.comment-input-area {
+  display: flex !important;
+  flex-shrink: 0;
+  width: 100%;
+  min-height: 68px;
+  gap: 10px;
+  padding: 14px 8px;
+  box-sizing: border-box;
+  align-items: center;
+  background: #24242c;
+}
+
+.comment-input-area input {
+  display: block !important;
+  flex: 1 1 auto;
+  width: 0;
+  min-width: 0;
+  height: 48px;
+  padding: 12px 16px;
+  box-sizing: border-box;
+  font-size: 16px;
+  color: white;
+  background: #33333d;
+  border: 1px solid #888;
+  border-radius: 24px;
+}
+
+.comment-input-area button {
+  display: block !important;
+  flex: 0 0 auto;
+  min-width: 82px;
+  height: 46px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  font-size: 15px;
+  color: white;
+  background: #2563eb;
+  border-radius: 24px;
+}
+
+/* Comment input ko zyada jagah dein */
+.comments-section .comment-input-area {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  width: 100% !important;
+  gap: 8px !important;
+  padding: 12px 0 !important;
+  box-sizing: border-box !important;
+}
+
+.comments-section .comment-input-area input {
+  display: block !important;
+  flex: 1 1 0% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  height: 52px !important;
+  padding: 12px 16px !important;
+  box-sizing: border-box !important;
+  font-size: 16px !important;
+  border-radius: 26px !important;
+}
+
+.comments-section .comment-input-area button {
+  display: block !important;
+  flex: 0 0 70px !important;
+  width: 70px !important;
+  min-width: 70px !important;
+  height: 44px !important;
+  padding: 4px !important;
+  font-size: 13px !important;
+  white-space: nowrap !important;
+}
+
+/* Bada comment box, chhota Send button */
+.comments-section .comment-input-area {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
+  width: 100% !important;
+  padding: 12px 0 !important;
+  box-sizing: border-box !important;
+}
+
+.comments-section .comment-input-area input {
+  flex: 1 1 auto !important;
+  width: 1px !important;
+  min-width: 0 !important;
+  height: 54px !important;
+  padding: 14px 18px !important;
+  font-size: 16px !important;
+  box-sizing: border-box !important;
+  border-radius: 27px !important;
+}
+
+.comments-section .comment-input-area button {
+  flex: 0 0 64px !important;
+  width: 64px !important;
+  min-width: 64px !important;
+  height: 42px !important;
+  padding: 4px !important;
+  font-size: 12px !important;
+  white-space: normal !important;
+}
+
+/* Comments panel ko feed se alag scroll karayein */
+.comments-section {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: 70vh !important;
+  max-height: 70vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  z-index: 99999 !important;
+}
+
+/* Sirf comments wala hissa scroll ho */
+.comments-section #commentsBox {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  touch-action: pan-y;
+}
+
+/* Neeche comment likhne ka box fixed rahe */
+.comments-section .comment-input-area {
+  flex: 0 0 auto !important;
+  touch-action: manipulation;
+}
+
+/* ShortVibe mobile keyboard fix */
+.comments-section {
+  height: 70vh;
+  max-height: 70vh;
+  max-height: 70dvh;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+
+.comments-section .comment-input-area {
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.comments-section .comment-input-area input {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: clip;
+}
+
+.comments-section #commentsBox {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Fix: comment text clipping */
+.comments-section .comment-input-area input {
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  flex: 1 1 0% !important;
+  box-sizing: border-box !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+  text-overflow: clip !important;
+  overflow: visible !important;
+  white-space: nowrap !important;
+}
+
+.comments-section .comment-input-area textarea {
+  flex: 1 1 0% !important;
+  width: 0 !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  padding: 12px 16px !important;
+  border: 1px solid #888 !important;
+  border-radius: 22px !important;
+  background: #33333d !important;
+  color: white !important;
+  font: inherit !important;
+  font-size: 16px !important;
+  line-height: 1.4 !important;
+  resize: none !important;
+  overflow-y: auto !important;
+  overflow-wrap: anywhere !important;
+}
+
+.comments-section .comment-input-area textarea {
+  height: auto !important;
+  min-height: 48px !important;
+  max-height: 120px !important;
+  overflow-y: auto !important;
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  line-height: 1.4 !important;
+  box-sizing: border-box !important;
+  resize: none !important;
+}
+/* Instagram-style bottom navigation */
+#bottomNav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9000;
+  display: none;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  background: #20202a;
+  border-top: 1px solid #414153;
+  padding: 8px 4px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+#bottomNav button {
+  background: transparent;
+  color: white;
+  font-size: 10px;
+  padding: 8px 1px;
+  margin: 0;
+  border-radius: 8px;
+}
+
+#bottomNav button.active {
+  color: #ff3867;
+  background: #30303c;
+}
+
+body {
+  padding-bottom: 75px;
+}
+
+#feed video {
+  width: 100%;
+  max-height: 65vh;
+  object-fit: contain;
+}
+/* ShortVibe Reels screen */
+body.reels-mode header {
+  display: none;
+}
+
+body.reels-mode main {
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+body.reels-mode #feedPanel {
+  margin: 0;
+  padding: 0;
+}
+
+body.reels-mode #feedPanel h3,
+body.reels-mode #refreshBtn {
+  display: none;
+}
+
+body.reels-mode #feed {
+  height: calc(100dvh - 130px);
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.reels-mode #feed .feed-card {
+  min-height: calc(100dvh - 130px);
+  margin: 0;
+  border-radius: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+body.reels-mode #feed .feed-card video {
+  width: 100%;
+  height: 65dvh;
+  max-height: 65dvh;
+  object-fit: contain;
+  background: #000;
+}
+
+body.reels-mode #feed .feed-card .comments-section {
+  z-index: 99999;
+}
+
+/* ShortVibe Neon 3D Intro */
+#svIntro {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 45%, #251044 0%, #090713 55%, #020207 100%);
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+#svIntro.svIntroHide {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#svIntro .svGlow {
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  border-radius: 50%;
+  background: #ff168f;
+  filter: blur(85px);
+  opacity: 0.45;
+  animation: svGlowMove 2s ease-in-out infinite alternate;
+}
+
+#svIntro .svGlowBlue {
+  width: 200px;
+  height: 200px;
+  background: #00d9ff;
+  transform: translate(90px, 80px);
+  animation-delay: 0.5s;
+}
+
+#svIntro .svLogo {
+  position: relative;
+  width: 155px;
+  height: 155px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 38px;
+  border: 2px solid #ff42c6;
+  background: linear-gradient(145deg, #321050, #080d28);
+  box-shadow:
+    0 0 18px #ff168f,
+    0 0 45px #9c20ff,
+    inset 0 0 25px #173dff;
+  animation: svLogoSpin 3s ease-in-out infinite;
+}
+
+#svIntro .svPlay {
+  width: 0;
+  height: 0;
+  margin-left: 12px;
+  border-top: 34px solid transparent;
+  border-bottom: 34px solid transparent;
+  border-left: 52px solid #fff;
+  filter: drop-shadow(0 0 8px #00eaff)
+          drop-shadow(0 0 16px #ff35c8);
+}
+
+#svIntro .svTitle {
+  position: relative;
+  margin-top: 34px;
+  font-size: clamp(34px, 9vw, 48px);
+  font-weight: 900;
+  letter-spacing: -1px;
+  color: white;
+  text-shadow:
+    0 0 8px #ff168f,
+    0 0 22px #ff168f,
+    0 0 35px #00d9ff;
+}
+
+#svIntro .svTagline {
+  position: relative;
+  margin-top: 10px;
+  color: #d8d5ff;
+  font-size: 14px;
+  letter-spacing: 2px;
+}
+
+#svIntro .svLoader {
+  position: relative;
+  width: 180px;
+  height: 5px;
+  margin-top: 38px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #29233d;
+  box-shadow: 0 0 12px #6315a5;
+}
+
+#svIntro .svLoader::after {
+  content: "";
+  display: block;
+  width: 45%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #ff168f, #00eaff);
+  box-shadow: 0 0 12px #00eaff;
+  animation: svLoading 2.7s ease-in-out forwards;
+}
+
+@keyframes svLogoSpin {
+  0%, 100% {
+    transform: perspective(500px) rotateY(-15deg) rotateX(8deg);
+  }
+  50% {
+    transform: perspective(500px) rotateY(15deg) rotateX(-8deg);
+  }
+}
+
+@keyframes svGlowMove {
+  from { transform: translate(-45px, -20px) scale(0.85); }
+  to { transform: translate(45px, 25px) scale(1.2); }
+}
+
+@keyframes svLoading {
+  from { width: 0; }
+  to { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #svIntro *,
+  #svIntro *::before {
+    animation-duration: 0.01ms !important;
+  }
+}
+
+/* Extra Neon 3D Rings */
+#svIntro .svLogo {
+  position: relative;
+  isolation: isolate;
+  box-shadow:
+    0 0 25px #ff168f,
+    0 0 55px #9c20ff,
+    0 0 80px #00d9ff,
+    inset 0 0 25px #173dff;
+}
+
+#svIntro .svLogo::before,
+#svIntro .svLogo::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 180px;
+  height: 70px;
+  border: 3px solid #ff168f;
+  border-radius: 50%;
+  box-shadow: 0 0 15px #ff168f;
+  pointer-events: none;
+}
+
+#svIntro .svLogo::before {
+  animation: svRingSpin 2s linear infinite;
+}
+
+#svIntro .svLogo::after {
+  border-color: #00d9ff;
+  box-shadow: 0 0 15px #00d9ff;
+  transform: rotate(60deg);
+  animation: svRingSpin 2.5s linear infinite reverse;
+}
+
+@keyframes svRingSpin {
+  from { rotate: 0deg; }
+  to { rotate: 360deg; }
+}
+
+/* Instagram जैसी Full Screen Reels */
+body.reels-mode {
+  padding: 0 !important;
+  padding-bottom: 0 !important;
+  overflow: hidden;
+}
+
+body.reels-mode #feedPanel {
+  margin: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  height: calc(100dvh - 65px);
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  background: #000;
+}
+
+body.reels-mode #feed {
+  margin: 0 !important;
+  padding: 0 !important;
+  gap: 0 !important;
+}
+
+body.reels-mode #feed .feed-card {
+  position: relative;
+  width: 100%;
+  height: calc(100dvh - 65px);
+  min-height: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  overflow: hidden;
+  background: #000;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+body.reels-mode #feed .feed-card video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+body.reels-mode #bottomNav {
+  z-index: 9000;
+}
+
+/* ShortVibe Reels layout correction */
+body.reels-mode #feed .feed-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+  height: calc(100dvh - 65px);
+  min-height: 0;
+  padding: 0 !important;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Video ko poori screen mein fit karein */
+body.reels-mode #feed .feed-card video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 1;
+}
+
+/* Username aur Follow ko video ke upar rakhein */
+body.reels-mode #feed .feed-card > p:first-of-type,
+body.reels-mode #feed .feed-card > button {
+  position: relative;
+  z-index: 3;
+}
+
+/* Caption neeche dikhayein */
+body.reels-mode #feed .feed-card .caption {
+  position: absolute;
+  left: 14px;
+  right: 80px;
+  bottom: 20px;
+  z-index: 3;
+  color: white;
+  text-shadow: 0 1px 4px #000;
+}
+
+/* Three-dot menu upar rahe */
+body.reels-mode #feed .feed-card > div:first-child {
+  position: relative;
+  z-index: 5;
+}
+
+/* Reels Follow button correction */
+body.reels-mode #feed .feed-card > button {
+  position: absolute !important;
+  top: 58px;
+  left: 14px;
+  right: auto;
+  width: auto;
+  min-width: 100px;
+  z-index: 10;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* Username ko upar rakhein */
+body.reels-mode #feed .feed-card > p:first-of-type {
+  position: absolute !important;
+  top: 12px;
+  left: 14px;
+  z-index: 10;
+  color: white;
+}
+
+/* Caption ko video ke neeche overlay karein */
+body.reels-mode #feed .feed-card .caption {
+  bottom: 24px;
+  left: 14px;
+  right: 80px;
+  color: white;
+  z-index: 10;
+}
+
+/* Reels username aur follow position fix */
+body.reels-mode #feed .feed-card > p:first-of-type {
+  top: 18px !important;
+  left: 14px !important;
+  z-index: 20 !important;
+  width: auto;
+  color: #fff !important;
+  text-shadow: 0 2px 5px #000;
+}
+
+body.reels-mode #feed .feed-card > button {
+  top: 62px !important;
+  left: 14px !important;
+  z-index: 20 !important;
+}
+
+/* Video ko center mein rakhein */
+body.reels-mode #feed .feed-card video {
+  z-index: 1;
+  object-fit: contain;
+}
+
+/* Reels ka background */
+body.reels-mode #feed,
+body.reels-mode #feedPanel {
+  background: #000 !important;
+}
+
+/* ShortVibe Instagram-style Full Screen Reels */
+body.reels-mode {
+  padding: 0 !important;
+  overflow: hidden;
+  background: #000 !important;
+}
+
+body.reels-mode #feedPanel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100dvh;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  overflow-y: auto;
+  background: #000 !important;
+  z-index: 100;
+}
+
+body.reels-mode #feed {
+  display: block;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.reels-mode #feed .feed-card {
+  position: relative !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  background: #000 !important;
+  scroll-snap-align: start;
+}
+
+body.reels-mode #feed .feed-card video {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 1 !important;
+}
+
+/* Username: upar baayi taraf */
+body.reels-mode #feed .feed-card > p:first-of-type {
+  position: absolute !important;
+  top: 55px !important;
+  left: 14px !important;
+  z-index: 10 !important;
+  color: white !important;
+}
+
+/* Follow: neeche baayi taraf */
+body.reels-mode #feed .feed-card > button {
+  position: absolute !important;
+  top: auto !important;
+  bottom: 105px !important;
+  left: 14px !important;
+  right: auto !important;
+  width: auto !important;
+  min-width: 95px;
+  z-index: 10 !important;
+}
+
+/* Caption: neeche */
+body.reels-mode #feed .feed-card .caption {
+  position: absolute !important;
+  left: 14px !important;
+  right: 75px !important;
+  bottom: 55px !important;
+  z-index: 10 !important;
+  color: white !important;
+}
+
+/* Teen dot menu: upar daayi taraf */
+body.reels-mode #feed .feed-card > div:first-child {
+  position: absolute !important;
+  top: 45px !important;
+  right: 12px !important;
+  left: auto !important;
+  z-index: 30 !important;
+}
+
+/* Bottom navigation Reels mein bhi dikhe */
+body.reels-mode #bottomNav {
+  z-index: 9000 !important;
+}
+
+/* Reels ko poori screen par lamba karein */
+body.reels-mode #feed .feed-card {
+  width: 100% !important;
+  height: 100dvh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+body.reels-mode #feed .feed-card video {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Username aur Follow ek line mein */
+body.reels-mode #feed .feed-card > p:first-of-type {
+  position: absolute !important;
+  left: 14px !important;
+  bottom: 105px !important;
+  top: auto !important;
+  width: auto !important;
+  max-width: 55% !important;
+  margin: 0 !important;
+  color: #fff !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  z-index: 20 !important;
+}
+
+body.reels-mode #feed .feed-card > button {
+  position: absolute !important;
+  left: 145px !important;
+  bottom: 95px !important;
+  top: auto !important;
+  width: auto !important;
+  min-width: 85px !important;
+  padding: 7px 15px !important;
+  font-size: 13px !important;
+  z-index: 20 !important;
+}
+
+/* Caption neeche, username se alag */
+body.reels-mode #feed .feed-card .caption {
+  position: absolute !important;
+  left: 14px !important;
+  right: 75px !important;
+  bottom: 55px !important;
+  color: #fff !important;
+  z-index: 20 !important;
+}
+
+/* Reels: video ko aur lamba karein */
+body.reels-mode #feed .feed-card {
+  height: calc(100dvh - 60px) !important;
+  min-height: calc(100dvh - 60px) !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+/* Video poori Reels screen cover kare */
+body.reels-mode #feed .feed-card video {
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+}
+
+/* Username neeche baayi taraf */
+body.reels-mode #feed .feed-card > p:first-of-type {
+  position: absolute !important;
+  left: 16px !important;
+  bottom: 100px !important;
+  top: auto !important;
+  margin: 0 !important;
+  width: auto !important;
+  max-width: 55% !important;
+  color: #fff !important;
+  font-size: 17px !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 5px #000 !important;
+  z-index: 20 !important;
+}
+
+/* Follow username ke bagal mein */
+body.reels-mode #feed .feed-card > button {
+  position: absolute !important;
+  left: 130px !important;
+  bottom: 94px !important;
+  top: auto !important;
+  width: auto !important;
+  min-width: 90px !important;
+  padding: 7px 14px !important;
+  border: 1px solid #fff !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  color: #fff !important;
+  font-size: 13px !important;
+  z-index: 20 !important;
+}
+
+/* Caption username ke neeche */
+body.reels-mode #feed .feed-card .caption {
+  position: absolute !important;
+  left: 16px !important;
+  right: 75px !important;
+  bottom: 55px !important;
+  margin: 0 !important;
+  color: #fff !important;
+  text-shadow: 0 1px 5px #000 !important;
+  z-index: 20 !important;
+}
+
+/* Mobile full-height Reels */
+body.reels-mode {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+
+body.reels-mode #feedPanel {
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-y: auto !important;
+  background: #000 !important;
+  z-index: 100 !important;
+}
+
+body.reels-mode #feed {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.reels-mode #feed .feed-card {
+  position: relative !important;
+  width: 100% !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  min-height: 100vh !important;
+  min-height: 100dvh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+}
+
+body.reels-mode #feed .feed-card video {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+}
+
+/* Username aur Follow neeche ek line mein */
+body.reels-mode #feed .feed-card > p:first-of-type {
+  position: absolute !important;
+  left: 16px !important;
+  bottom: 105px !important;
+  top: auto !important;
+  color: #fff !important;
+  z-index: 20 !important;
+}
+
+body.reels-mode #feed .feed-card > button {
+  position: absolute !important;
+  left: 145px !important;
+  bottom: 95px !important;
+  top: auto !important;
+  z-index: 20 !important;
+}
+
+/* Caption */
+body.reels-mode #feed .feed-card .caption {
+  position: absolute !important;
+  left: 16px !important;
+  bottom: 55px !important;
+  right: 75px !important;
+  color: white !important;
+  z-index: 20 !important;
+}
+
+/* Three dots upper right */
+body.reels-mode #feed .feed-card > div:first-child {
+  position: absolute !important;
+  top: 10px !important;
+  right: 10px !important;
+  left: auto !important;
+  z-index: 30 !important;
+}
+
+  
+/* FINAL FIX: Reels video fills the available mobile screen */
+html, body { min-height: 100%; }
+body.reels-mode {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #000 !important;
+}
+body.reels-mode #bottomNav {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  z-index: 10000 !important;
+}
+body.reels-mode #feedPanel {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 72px !important;
+  width: 100vw !important;
+  height: auto !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #000 !important;
+}
+body.reels-mode #feed {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  scroll-snap-type: y mandatory !important;
+}
+body.reels-mode #feed .feed-card {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  overflow: hidden !important;
+  scroll-snap-align: start !important;
+  background: #000 !important;
+}
+body.reels-mode #feed .feed-card video {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  border-radius: 0 !important;
+  background: #000 !important;
+}
+body.reels-mode #feed .feed-card > p:first-of-type {
+  position: absolute !important;
+  left: 16px !important;
+  bottom: 94px !important;
+  top: auto !important;
+  width: auto !important;
+  margin: 0 !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+  text-shadow: 0 1px 5px #000 !important;
+  z-index: 100 !important;
+}
+body.reels-mode #feed .feed-card > button {
+  position: absolute !important;
+  left: 145px !important;
+  bottom: 84px !important;
+  top: auto !important;
+  width: auto !important;
+  margin: 0 !important;
+  padding: 7px 13px !important;
+  z-index: 100 !important;
+}
+body.reels-mode #feed .feed-card .caption {
+  position: absolute !important;
+  left: 16px !important;
+  right: 78px !important;
+  bottom: 40px !important;
+  margin: 0 !important;
+  color: #fff !important;
+  text-shadow: 0 1px 5px #000 !important;
+  z-index: 100 !important;
+}
+
+
+/* Show Like, Comments, Save and Share over the right side of Reels */
+body.reels-mode #feed .feed-card > div:has(> button) {
+  z-index: 150 !important;
+}
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] {
+  position: absolute !important;
+  right: 10px !important;
+  bottom: 115px !important;
+  top: auto !important;
+  width: 62px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  margin: 0 !important;
+  padding: 8px 0 !important;
+  background: transparent !important;
+  z-index: 200 !important;
+}
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] p {
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  color: #fff !important;
+  text-align: center !important;
+  text-shadow: 0 1px 4px #000 !important;
+}
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] button {
+  display: block !important;
+  width: 54px !important;
+  min-width: 54px !important;
+  max-width: 54px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 5px 2px !important;
+  background: rgba(0,0,0,.25) !important;
+  border: 0 !important;
+  color: white !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  text-shadow: 0 1px 4px #000 !important;
+}
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] button:first-of-type {
+  font-size: 27px !important;
+  min-height: 40px !important;
+}
+body.reels-mode #feed .feed-card .caption {
+  right: 78px !important;
+}
+
+
+/* Put the Like count directly UNDER the heart button, not above it */
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] {
+  flex-direction: column !important;
+}
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] > p {
+  order: 2 !important;
+  margin-top: -7px !important;
+  margin-bottom: 8px !important;
+}
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] > button:first-of-type {
+  order: 1 !important;
+}
+
+
+/* Correct Like UI: preserve heart button position, remove only the floating
+   "❤️ 1 Likes" label above it, and put the count immediately under the heart. */
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] {
+  bottom: 115px !important;
+  gap: 12px !important;
+}
+body.reels-mode #feed .feed-card > div[style*="align-items: center"] > p {
+  display: none !important;
+}
+/* A count label is added only if the existing app exposes a likes count node. */
+body.reels-mode #feed .feed-card .reels-like-count {
+  display: block !important;
+  order: 2 !important;
+  margin: -8px 0 4px !important;
+  width: 62px !important;
+  color: #fff !important;
+  font-size: 12px !important;
+  line-height: 1.2 !important;
+  text-align: center !important;
+  text-shadow: 0 1px 4px #000 !important;
+}
+
+
+/* When the three-dot menu is open, hide Reels action buttons behind it. */
+body.reels-mode #feed .feed-card.sv-menu-open > div[style*="align-items: center"] {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.reels-mode #feed .feed-card.sv-menu-open .sv-video-options-wrap {
+  z-index: 99999 !important;
+}
+.sv-speed-submenu { display:none; }
+.sv-share-sheet { position:fixed; inset:0; z-index:100000; background:rgba(0,0,0,.62); display:flex; align-items:flex-end; justify-content:center; padding:12px; box-sizing:border-box; }
+.sv-share-panel { width:min(520px,100%); background:#242430; color:#fff; border-radius:20px 20px 12px 12px; padding:18px 14px calc(18px + env(safe-area-inset-bottom)); box-shadow:0 8px 30px rgba(0,0,0,.5); }
+.sv-share-title { font-size:18px; font-weight:700; margin:0 0 16px; }
+.sv-share-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px 8px; }
+.sv-share-choice { border:0; background:transparent; color:#fff; display:flex; flex-direction:column; align-items:center; gap:7px; padding:8px 2px; font-size:12px; }
+.sv-share-icon { width:48px; height:48px; border-radius:50%; background:#414151; display:flex; align-items:center; justify-content:center; font-size:24px; }
+.sv-share-close { margin-top:14px; width:100%; padding:12px; border:0; border-radius:10px; background:#414151; color:white; font-weight:700; }
+
+
+/* FINAL: comments overlay scrolls independently; background Reels stays locked */
+body.sv-comments-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+  touch-action: pan-y;
+}
+body.sv-comments-open #bottomNav {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.sv-comments-open #feed .feed-card > div[style*="align-items: center"] {
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+.comments-section {
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  isolation: isolate;
+  z-index: 100000 !important;
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
+}
+.comments-section #commentsBox {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+  touch-action: pan-y !important;
+}
+.comments-section .comment-input-area,
+.comments-section textarea,
+.comments-section button {
+  touch-action: manipulation;
+}
+.comments-section textarea {
+  max-height: 110px !important;
+}
+body.sv-comments-open #feed {
+  overflow: hidden !important;
+}
+.sv-video-error {
+  position: absolute;
+  inset: auto 12px 12px 12px;
+  z-index: 7;
+  background: rgba(20,20,25,.92);
+  color: #fff;
+  border: 1px solid #ff3867;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  display: none;
+  overflow-wrap: anywhere;
+}
+
+
+/* Final UX fix: comments overlay must cover Reel controls and bottom navigation */
+body.sv-comments-open #bottomNav {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.sv-comments-open #feed .feed-card .sv-reel-actions,
+body.sv-comments-open #feed .feed-card .sv-video-options-wrap,
+body.sv-comments-open #feed .feed-card .sv-reel-back {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+body.sv-comments-open #feed .feed-card {
+  pointer-events: none !important;
+}
+body.sv-comments-open .comments-section,
+body.sv-comments-open .comments-section * {
+  pointer-events: auto;
+}
+.sv-reel-back {
+  display: none;
+  position: absolute;
+  top: 48px;
+  left: 12px;
+  z-index: 10020;
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0,0,0,.38);
+  color: #fff;
+  font-size: 30px;
+  line-height: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+body.reels-mode #feed .feed-card .sv-reel-back { display: flex !important; }
+body.sv-comments-open #feed .feed-card .sv-reel-back { display: none !important; }
+.sv-reel-actions { position: relative; }
+/* Comments panel's own return control is arrow-only */
+.comments-section .sv-comments-back {
+  align-self: flex-start !important;
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 42px !important;
+  padding: 0 !important;
+  font-size: 30px !important;
+  line-height: 1 !important;
+  text-align: center !important;
+  border-radius: 50% !important;
+}
+
+
+/* ShortVibe home stories, messages, profile tabs and safer video overlays */
+.sv-home-tools { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 14px; }
+.sv-home-tools button { width:auto; margin:0; }
+.sv-stories { display:flex; gap:12px; overflow-x:auto; padding:10px 2px 14px; margin:8px 0 12px; }
+.sv-story { flex:0 0 76px; width:76px; text-align:center; font-size:12px; color:#eee; overflow-wrap:anywhere; }
+.sv-story-ring { width:66px; height:66px; margin:0 auto 6px; padding:3px; border-radius:50%; background:linear-gradient(135deg,#ff3867,#a855f7,#ffb703); }
+.sv-story-ring img,.sv-story-ring .sv-story-letter { width:100%; height:100%; display:flex; align-items:center; justify-content:center; border-radius:50%; border:3px solid #22222c; background:#33333d; object-fit:cover; color:white; font-weight:bold; }
+.sv-profile-photo { width:82px; height:82px; border-radius:50%; object-fit:cover; background:#414153; border:2px solid #ff3867; }
+.sv-profile-tabs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:14px 0; }
+.sv-profile-tabs button { margin:0; padding:10px 4px; font-size:13px; background:#414153; }
+.sv-profile-tabs button.active { background:#ff3867; }
+.sv-page-back { position:sticky; top:0; z-index:500; width:auto; margin:0 0 10px; padding:8px 14px; background:#414153; }
+.sv-message-list { display:flex; flex-direction:column; gap:8px; max-height:42vh; overflow:auto; padding:8px 0; }
+.sv-message { background:#33333d; padding:10px 12px; border-radius:12px; overflow-wrap:anywhere; }
+.sv-message small { display:block; color:#bbb; margin-top:4px; }
+.sv-inline-form { display:flex; gap:8px; align-items:center; }
+.sv-inline-form input { flex:1; min-width:0; }
+.sv-inline-form button { width:auto; flex-shrink:0; }
+/* Home feed: pull down from the top to refresh, like Instagram. */
+#refreshBtn { display:none !important; }
+#svPullRefreshHint { display:none; text-align:center; color:#c5c5d0; padding:8px; font-size:13px; }
+/* Navigation: keep the original five-icon outline bar, shown only on Home. */
+#bottomNav { display:none !important; }
+body.sv-home-page #bottomNav { display:grid !important; }
+body.reels-mode #bottomNav, body:not(.sv-home-page) #bottomNav, body.sv-comments-open #bottomNav { display:none !important; }
+body.reels-mode #feed .feed-card .sv-video-wrap { position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; min-height:100% !important; border-radius:0 !important; z-index:1 !important; overflow:hidden !important; }
+body.reels-mode #feed .feed-card .sv-video-wrap video { position:absolute !important; inset:0 !important; width:100% !important; height:100% !important; max-height:none !important; object-fit:contain !important; background:#000 !important; z-index:1 !important; }
+body.reels-mode #feed .feed-card .sv-video-wrap > button[aria-label*="Play"], body.reels-mode #feed .feed-card .sv-video-wrap > button[aria-label*="Retry"] { z-index:5 !important; }
+</style>
+
+<style id="sv-instagram-nav-final">
+  #bottomNav {
+    position:fixed !important; left:0 !important; right:0 !important; bottom:0 !important;
+    width:100% !important; min-height:calc(68px + env(safe-area-inset-bottom,0px)) !important;
+    padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px)) !important; margin:0 !important;
+    display:none !important; grid-template-columns:repeat(6,minmax(0,1fr)) !important;
+    align-items:center !important; gap:0 !important; background:#101014 !important;
+    border-top:1px solid #34343c !important; z-index:10000 !important; box-sizing:border-box !important;
+  }
+  body.sv-home-page #bottomNav { display:grid !important; }
+  body.reels-mode #bottomNav, body:not(.sv-home-page) #bottomNav, body.sv-comments-open #bottomNav { display:none !important; }
+  #bottomNav button {
+    display:flex !important; flex-direction:column !important; align-items:center !important; justify-content:center !important;
+    width:100% !important; min-width:0 !important; height:54px !important; margin:0 !important; padding:4px 1px !important;
+    border:0 !important; border-radius:8px !important; background:transparent !important; color:#f7f7fa !important;
+    box-shadow:none !important; font-size:0 !important; line-height:1 !important; white-space:normal !important;
+  }
+  #bottomNav button.active { color:#ff3867 !important; background:transparent !important; }
+  #bottomNav .sv-nav-icon { display:block !important; font-size:0 !important; line-height:1 !important; margin:0 !important; }
+  #bottomNav .sv-nav-icon svg { width:34px !important; height:34px !important; display:block !important; fill:none !important; stroke:currentColor !important; stroke-width:2.2 !important; stroke-linecap:round !important; stroke-linejoin:round !important; }
+  body { padding-bottom:75px !important; }
+</style>
+</head>
+
+<script>
+(function () {
+  const viewport = window.visualViewport;
+
+  if (!viewport) return;
+
+  function adjustCommentsPanel() {
+    const panel = document.querySelector(".comments-section");
+
+    if (!panel || !panel.classList.contains("open")) return;
+
+    const keyboardHeight =
+      window.innerHeight - viewport.height - viewport.offsetTop;
+
+    panel.style.bottom = Math.max(0, keyboardHeight) + "px";
+    panel.style.maxHeight =
+      Math.max(180, viewport.height * 0.9) + "px";
+    panel.style.height =
+      Math.max(180, viewport.height * 0.9) + "px";
+  }
+
+  viewport.addEventListener("resize", adjustCommentsPanel);
+  viewport.addEventListener("scroll", adjustCommentsPanel);
+
+  document.addEventListener("focusin", function (event) {
+    if (event.target.closest(".comment-input-area")) {
+      setTimeout(adjustCommentsPanel, 150);
+    }
+  });
+
+  document.addEventListener("focusout", function () {
+    setTimeout(function () {
+      const panel = document.querySelector(".comments-section");
+
+      if (panel) {
+        panel.style.bottom = "0px";
+        panel.style.height = "";
+        panel.style.maxHeight = "";
+      }
+    }, 250);
+  });
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const openCameraBtn = document.getElementById("openCameraBtn");
+  const cameraInput = document.getElementById("cameraFile");
+
+  if (openCameraBtn && cameraInput) {
+    openCameraBtn.addEventListener("click", function () {
+      cameraInput.click();
+    });
+  }
+});
+</script>
+
+
+<body>
+  
+<!-- ShortVibe Neon 3D Intro: restore the earlier logo, title, tagline and loading bar -->
+<div id="svIntro" aria-label="ShortVibe loading intro">
+  <div class="svGlow"></div>
+  <div class="svGlow svGlowBlue"></div>
+  <div class="svLogo" aria-hidden="true"><div class="svPlay"></div></div>
+  <div class="svTitle">ShortVibe</div>
+  <div class="svTagline">SHORT VIDEOS · BIG MOMENTS</div>
+  <div class="svLoader" aria-hidden="true"></div>
+</div>
+
+  <header>ShortVibe</header>
+
+  <main>
+    <p id="message" role="status" aria-live="polite"></p>
+
+    <!-- LOGIN / SIGN UP -->
+    <section class="panel" id="authPanel">
+      <h3>Login / नया अकाउंट</h3>
+
+      <input
+        id="name"
+        type="text"
+        placeholder="आपका नाम (Sign Up के लिए)"
+        autocomplete="name"
+      >
+
+      <input
+        id="email"
+        type="email"
+        placeholder="ईमेल"
+        autocomplete="email"
+      >
+
+      <input
+        id="password"
+        type="password"
+        placeholder="पासवर्ड (कम से कम 6 अक्षर)"
+        autocomplete="current-password"
+      >
+
+      <button id="signupBtn" type="button">
+        नया अकाउंट बनाएँ
+      </button>
+
+      <button id="loginBtn" class="secondary" type="button">
+        Login करें
+      </button>
+
+      <p class="muted">
+        नया अकाउंट बनाने के बाद ईमेल सत्यापन माँगा जाए,
+        तो अपने ईमेल में आए लिंक को खोलें।
+      </p>
+    </section>
+
+    
+<!-- PROFILE -->
+
+<!-- SETTINGS -->
+<section class="panel hidden" id="settingsPanel">
+  <button type="button" class="sv-page-back" id="svSettingsBack">‹ Profile</button>
+  <h3>Settings ⚙️</h3>
+
+  <p>अकाउंट की जानकारी</p>
+  <p id="settingsEmail" class="muted"></p>
+
+  <button id="settingsLogoutBtn" class="secondary" type="button">
+    Logout
+  </button>
+</section>
+
+<section class="panel hidden sv-facebook-profile" id="profilePanel">
+  <div class="sv-cover-photo" aria-label="Profile cover photo">
+    <span>ShortVibe ✦</span>
+    <label class="sv-cover-change" for="svCoverPhotoInput" title="Cover photo बदलें">📷</label>
+    <input id="svCoverPhotoInput" type="file" accept="image/*" class="sv-visually-hidden-input" />
+  </div>
+  <div class="sv-profile-head">
+    <div class="sv-avatar-wrap">
+      <img id="svProfilePhoto" class="sv-profile-photo" alt="Profile photo" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%233b3b49'/%3E%3Ccircle cx='50' cy='36' r='19' fill='%23bfc1ce'/%3E%3Cpath d='M15 100c2-26 16-39 35-39s33 13 35 39' fill='%23bfc1ce'/%3E%3C/svg%3E" />
+      <label class="sv-avatar-camera" for="svProfilePhotoInput" title="Profile फोटो बदलें">📷</label>
+      <input id="svProfilePhotoInput" type="file" accept="image/*" class="sv-visually-hidden-input" />
+    </div>
+    <div class="sv-profile-heading">
+      <h2 id="svProfileDisplayName">ShortVibe User</h2>
+      <p id="profileName">अपनी प्रोफ़ाइल</p>
+    </div>
+  </div>
+  <div class="sv-profile-stats" id="followStats">
+    <div><strong id="followersCount">0</strong><span>Followers</span></div>
+    <div><strong id="followingCount">0</strong><span>Following</span></div>
+    <div><strong id="svPostCount">0</strong><span>Posts</span></div>
+  </div>
+  <p class="sv-profile-bio" id="svProfileBio">ShortVibe पर अपनी वीडियो और यादें शेयर करें।</p>
+  <div class="sv-profile-actions">
+    <button type="button" id="svAddStoryProfile">＋ Add to Story</button>
+    <button type="button" id="svProfileMoreBtn" class="secondary">⋯ Edit / More</button>
+    <button type="button" id="svProfileSettingsBtn" class="secondary">⚙️ Settings</button>
+  </div>
+  <div class="sv-profile-tabs" id="svProfileTabs">
+    <button type="button" data-profile-tab="posts" class="active">▦ Posts</button>
+    <button type="button" data-profile-tab="reels">▶ Reels</button>
+    <button type="button" data-profile-tab="collab">🤝 Collaboration</button>
+  </div>
+  <p id="svProfileTabInfo" class="muted">आपकी अपलोड की हुई पोस्ट और वीडियो यहाँ दिखेंगी।</p>
+  <div id="svProfilePosts"></div>
+  <div id="svCollabPanel" class="hidden">
+    <p class="muted">Collaboration अनुरोध अभी इसी डिवाइस पर सेव होंगे। दूसरे यूज़र तक भेजने के लिए Supabase collaboration table चाहिए।</p>
+    <input id="svCollabUser" type="text" placeholder="Collaborator का username" />
+    <input id="svCollabText" type="text" placeholder="Collaboration का संदेश" />
+    <button id="svCollabSend" type="button">Collaboration अनुरोध सेव करें</button>
+  </div>
+</section>
+
+    <!-- UPLOAD -->
+    <section class="panel hidden" id="uploadPanel">
+      <h3>अपना वीडियो शेयर करें 🎥</h3>
+
+      <label for="galleryFile">Gallery से वीडियो चुनें</label>
+      <input
+        id="galleryFile"
+        type="file"
+        accept="video/*"
+      >
+
+<label for="cameraFile">Camera से वीडियो बनाएँ</label>
+<input
+  id="cameraFile"
+  type="file"
+  accept="video/*"
+  capture="environment"
+>
+
+   
+
+
+<button type="button" id="openCameraBtn">📷 Camera खोलें</button>
+
+
+      <input
+        id="caption"
+        type="text"
+        maxlength="300"
+        placeholder="वीडियो का Caption लिखें"
+      >
+
+      <button id="uploadBtn" type="button">
+        वीडियो Upload करें
+      </button>
+
+      <p class="muted">
+        टेस्ट के लिए अधिकतम 50 MB की वीडियो चुनें।
+        अपलोड होने में इंटरनेट की गति के अनुसार समय लग सकता है।
+      </p>
+    </section>
+
+    <!-- VIDEO FEED -->
+    <section id="feedPanel" class="hidden">
+      <div id="svStories" class="sv-stories" aria-label="Stories"></div>
+      <input id="svStoryFilePicker" type="file" accept="image/*,video/*" style="display:none" />
+      <div id="svPullRefreshHint" aria-live="polite">↓ छोड़ें, Feed Refresh होगी</div>
+      <button id="refreshBtn" class="secondary" type="button">
+        Feed Refresh करें
+      </button>
+
+      <div id="feed"></div>
+    </section>
+
+    <section id="svMessagesPanel" class="panel hidden">
+      <button type="button" class="sv-page-back" data-sv-back>‹ Home</button>
+      <h3>✉️ Messages</h3>
+      <p class="muted">यह शुरुआती Inbox है। संदेश अभी इसी डिवाइस पर सेव होंगे; दूसरे यूज़र को भेजने के लिए Supabase Messages table और policies जोड़ना ज़रूरी है।</p>
+      <div id="svMessageList" class="sv-message-list"></div>
+      <div class="sv-inline-form">
+        <input id="svMessageInput" type="text" maxlength="500" placeholder="Message लिखें..." />
+        <button id="svSendMessage" type="button">Send</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // 1. SUPABASE SETTINGS
+    const SUPABASE_URL =
+      "https://ovfcamxplgsfvqgixbhz.supabase.co";
+
+    // YOUR_PUBLISHABLE_KEY को अपनी Publishable API Key से बदलें।
+    // sb_publishable_... या पुराने anon key का इस्तेमाल करें।
+    const SUPABASE_KEY = "sb_publishable_xJiENLHkONosFPZIbM9WkA_aXqN_uic";
+
+    let db = null;
+    let currentUser = null;
+
+    function $(id) {
+      return document.getElementById(id);
+    }
+
+    function message(text) {
+      $("message").textContent = text;
+    }
+
+    function showUser(user) {
+      currentUser = user || null;
+      window.currentUser = currentUser;
+      window.dispatchEvent(new Event("shortvibe-auth-change"));
+      const loggedIn = Boolean(currentUser);
+      const nav = $("bottomNav");
+
+if (nav) {
+  nav.style.display = loggedIn ? "grid" : "none";
+}
+
+      $("authPanel").classList.toggle("hidden", loggedIn);
+      $("profilePanel").classList.toggle("hidden", !loggedIn);
+      $("uploadPanel").classList.toggle("hidden", !loggedIn);
+      $("feedPanel").classList.toggle("hidden", !loggedIn);
+
+      if (loggedIn) {
+        const displayName =
+          currentUser.user_metadata?.display_name ||
+          "ShortVibe User";
+
+        $("profileName").textContent = "नाम: " + displayName;
+        
+
+
+       const settingsEmail = $("settingsEmail");
+if (settingsEmail) {
+  settingsEmail.textContent =
+    "ईमेल: " + (currentUser.email || "");
+}
+      }
+    }
+
+    // 2. CHECK LOGIN STATUS
+    async function refreshUser() {
+      const { data, error } = await db.auth.getUser();
+
+      if (error) {
+        showUser(null);
+        return;
+      }
+
+      showUser(data.user);
+    }
+
+    // 3. SIGN UP
+    $("signupBtn").addEventListener("click", async function () {
+      if (!db) return;
+
+      const name = $("name").value.trim();
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      if (!name || !email || password.length < 6) {
+        message("नाम, सही ईमेल और कम से कम 6 अक्षर का पासवर्ड भरें।");
+        return;
+      }
+
+      const button = $("signupBtn");
+      button.disabled = true;
+      message("अकाउंट बनाया जा रहा है...");
+
+      try {
+        const { data, error } = await db.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: { display_name: name }
+          }
+        });
+
+        if (error) {
+          message("Sign Up Error: " + error.message);
+          return;
+        }
+
+        if (data.session && data.user) {
+          showUser(data.user);
+          $("password").value = "";
+          message("अकाउंट बन गया! आप Login हैं।");
+          await loadFeed();
+        } else {
+          message(
+            "अकाउंट बनाने का अनुरोध सफल हुआ। ईमेल सत्यापन करें, फिर Login करें।"
+          );
+        }
+      } catch (err) {
+        message("Error: " + err.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    // 4. LOGIN
+    $("loginBtn").addEventListener("click", async function () {
+      if (!db) return;
+
+      const email = $("email").value.trim();
+      const password = $("password").value;
+
+      if (!email || !password) {
+        message("ईमेल और पासवर्ड भरें।");
+        return;
+      }
+
+      const button = $("loginBtn");
+      button.disabled = true;
+      message("Login हो रहा है...");
+
+      try {
+        const { data, error } =
+          await db.auth.signInWithPassword({
+            email: email,
+            password: password
+          });
+
+        if (error) {
+          message("Login Error: " + error.message);
+          return;
+        }
+
+        showUser(data.user);
+        $("password").value = "";
+        message("Login सफल हुआ!");
+        await loadFeed();
+        if (window.shortVibeOpenPage) window.shortVibeOpenPage("home");
+      } catch (err) {
+        message("Error: " + err.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    // 5. LOGOUT
+    
+const logoutButton = $("logoutBtn");
+if (logoutButton) logoutButton.addEventListener("click", async function () {
+  
+const settingsLogoutButton = $("settingsLogoutBtn");
+
+if (settingsLogoutButton) {
+  settingsLogoutButton.addEventListener("click", async function () {
+    if (!db) return;
+
+    const { error } = await db.auth.signOut();
+
+    if (error) {
+      message("Logout Error: " + error.message);
+      return;
+    }
+
+    showUser(null);
+    $("password").value = "";
+    message("आप Logout हो गए।");
+  });
+}
+
+
+      if (!db) return;
+
+      const { error } = await db.auth.signOut();
+
+      if (error) {
+        message("Logout Error: " + error.message);
+        return;
+      }
+
+      showUser(null);
+      $("password").value = "";
+      message("आप Logout हो गए।");
+    });
+
+    // 6. GET SELECTED VIDEO
+    function getSelectedVideo() {
+      return $("galleryFile").files[0] ||
+             $("cameraFile").files[0] ||
+             null;
+    }
+
+    // एक ही वीडियो चुनने दें
+    $("galleryFile").addEventListener("change", function () {
+      if (this.files.length) {
+        $("cameraFile").value = "";
+      }
+    });
+
+    $("cameraFile").addEventListener("change", function () {
+      if (this.files.length) {
+        $("galleryFile").value = "";
+      }
+    });
+
+    // 7. UPLOAD VIDEO
+    $("uploadBtn").addEventListener("click", async function () {
+      if (!db || !currentUser) {
+        message("पहले Login करें।");
+        return;
+      }
+
+      const file = getSelectedVideo();
+      const caption = $("caption").value.trim();
+
+      if (!file) {
+        message("पहले Gallery या Camera से वीडियो चुनें।");
+        return;
+      }
+
+      if (!file.type.startsWith("video/")) {
+        message("कृपया वीडियो फ़ाइल ही चुनें।");
+        return;
+      }
+
+      if (file.size > 50 * 1024 * 1024) {
+        message("वीडियो 50 MB से छोटी चुनें।");
+        return;
+      }
+
+      const button = $("uploadBtn");
+      button.disabled = true;
+      message("वीडियो Upload हो रही है... कृपया प्रतीक्षा करें।");
+
+      let storagePath = "";
+
+      try {
+        const extension =
+          (file.name.split(".").pop() || "mp4")
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, "") || "mp4";
+
+        const uniqueId =
+          (window.crypto && crypto.randomUUID)
+            ? crypto.randomUUID()
+            : Date.now().toString() + Math.random().toString(16).slice(2);
+
+        storagePath =
+          currentUser.id + "/" + uniqueId + "." + extension;
+
+        const { error: uploadError } = await db.storage
+          .from("shortvibe-videos")
+          .upload(storagePath, file, {
+            contentType: file.type,
+            upsert: false
+          });
+
+        if (uploadError) {
+          message("Video Upload Error: " + uploadError.message);
+          return;
+        }
+
+        const username =
+          currentUser.user_metadata?.display_name ||
+          "ShortVibe User";
+
+        const { error: insertError } = await db
+          .from("videos")
+          .insert({
+            user_id: currentUser.id,
+            username: username,
+            caption: caption,
+            storage_path: storagePath
+          });
+
+        if (insertError) {
+          await db.storage
+            .from("shortvibe-videos")
+            .remove([storagePath]);
+
+          message("Video Record Error: " + insertError.message);
+          return;
+        }
+
+        $("galleryFile").value = "";
+        $("cameraFile").value = "";
+        $("caption").value = "";
+
+        message("वीडियो सफलतापूर्वक Upload हो गई!");
+        await loadFeed();
+      } catch (err) {
+        message("Upload Error: " + err.message);
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+let reelsVideoObserver = null;
+
+function setupReelsAutoPlay() {
+  if (!("IntersectionObserver" in window)) return;
+
+  if (reelsVideoObserver) {
+    reelsVideoObserver.disconnect();
+  }
+
+  reelsVideoObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      const video = entry.target;
+      const isReels = document.body.classList.contains("reels-mode");
+
+      if (document.body.classList.contains("sv-comments-open")) {
+        video.pause();
+        return;
+      }
+      if (isReels && entry.isIntersecting && entry.intersectionRatio >= 0.7) {
+        document.querySelectorAll("#feed video").forEach(function(otherVideo) {
+          if (otherVideo !== video) {
+            otherVideo.pause();
+          }
+        });
+
+        video.muted = true;
+        video.play().catch(function() {});
+      } else {
+        video.pause();
+      }
+    });
+  }, {
+    threshold: [0, 0.7, 1]
+  });
+
+  document.querySelectorAll("#feed video").forEach(function(video) {
+    reelsVideoObserver.observe(video);
+  });
+}
+
+async function deleteMyVideo(item, triggerButton) {
+  if (!currentUser || !item || item.user_id !== currentUser.id) {
+    message("आप केवल अपनी वीडियो Delete कर सकते हैं।");
+    return;
+  }
+  if (!confirm("क्या आप यह वीडियो हमेशा के लिए Delete करना चाहते हैं?")) return;
+
+  if (triggerButton) triggerButton.disabled = true;
+  try {
+    const { error: rowError } = await db
+      .from("videos")
+      .delete()
+      .eq("id", item.id)
+      .eq("user_id", currentUser.id);
+
+    if (rowError) throw rowError;
+
+    if (item.storage_path) {
+      const { error: storageError } = await db.storage
+        .from("shortvibe-videos")
+        .remove([item.storage_path]);
+      if (storageError) {
+        console.warn("Video record deleted, but storage cleanup failed:", storageError.message);
+      }
+    }
+
+    message("आपकी वीडियो Delete हो गई।");
+    await loadFeed();
+  } catch (error) {
+    console.error("Delete video error:", error);
+    message("वीडियो Delete नहीं हुई: " + (error.message || "कृपया दोबारा कोशिश करें।"));
+  } finally {
+    if (triggerButton) triggerButton.disabled = false;
+  }
+}
+
+async function toggleFollow(targetUserId, button) {
+  if (!currentUser) {
+    alert("Follow करने के लिए पहले Login करें।");
+    return;
+  }
+
+  if (!targetUserId || targetUserId === currentUser.id) {
+    alert("आप अपने आप को Follow नहीं कर सकते।");
+    return;
+  }
+
+  button.disabled = true;
+
+  try {
+    const { data: existingFollow, error: checkError } = await db
+      .from("follows")
+      .select("follower_id")
+      .eq("follower_id", currentUser.id)
+      .eq("following_id", targetUserId)
+      .maybeSingle();
+
+    if (checkError) throw checkError;
+
+    if (existingFollow) {
+      const { error } = await db
+        .from("follows")
+        .delete()
+        .eq("follower_id", currentUser.id)
+        .eq("following_id", targetUserId);
+
+      if (error) throw error;
+
+      button.textContent = "Follow";
+    } else {
+      const { error } = await db
+        .from("follows")
+        .insert({
+          follower_id: currentUser.id,
+          following_id: targetUserId
+        });
+
+      if (error) throw error;
+
+      button.textContent = "Following ✓";
+    }
+  } catch (error) {
+    console.error("Follow error:", error);
+    alert("Follow नहीं हो पाया: " + error.message);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+
+    // 8. LOAD VIDEO FEED
+    function openShortVibeShareSheet(item, videoUrl) {
+  const existing = document.querySelector(".sv-share-sheet");
+  if (existing) existing.remove();
+  const shareData = {
+    title: "ShortVibe Video",
+    text: "ShortVibe par @" + (item.username || "ShortVibe User") + " ki video dekhein!",
+    url: videoUrl
+  };
+  const sheet = document.createElement("div");
+  sheet.className = "sv-share-sheet";
+  const panel = document.createElement("div");
+  panel.className = "sv-share-panel";
+  const title = document.createElement("p");
+  title.className = "sv-share-title";
+  title.textContent = "Share video";
+  const grid = document.createElement("div");
+  grid.className = "sv-share-grid";
+  function addChoice(icon, label, handler) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "sv-share-choice";
+    const circle = document.createElement("span");
+    circle.className = "sv-share-icon";
+    circle.textContent = icon;
+    const caption = document.createElement("span");
+    caption.textContent = label;
+    btn.append(circle, caption);
+    btn.addEventListener("click", async function() { await handler(); });
+    grid.appendChild(btn);
+  }
+  async function nativeShare() {
+    try {
+      if (navigator.share) await navigator.share(shareData);
+      else {
+        await copyVideoLink(videoUrl);
+        message("वीडियो लिंक कॉपी हो गया।");
+      }
+      sheet.remove();
+    } catch (err) { if (err.name !== "AbortError") message("Share नहीं हो पाया।"); }
+  }
+  async function copyVideoLink(url) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(url);
+    } else { window.prompt("वीडियो लिंक कॉपी करें:", url); }
+  }
+  addChoice("📸", "Instagram", async function() {
+    // Browsers do not allow websites to force-open Instagram's post composer.
+    // Use the Android share sheet so the user can choose Instagram if installed.
+    await nativeShare();
+  });
+  addChoice("🟢", "WhatsApp", function() {
+    const text = encodeURIComponent(shareData.text + " " + videoUrl);
+    window.open("https://wa.me/?text=" + text, "_blank", "noopener");
+    sheet.remove();
+  });
+  addChoice("📘", "Facebook", function() {
+    window.open("https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(videoUrl), "_blank", "noopener");
+    sheet.remove();
+  });
+  addChoice("🔗", "Copy link", async function() {
+    try { await copyVideoLink(videoUrl); message("वीडियो लिंक कॉपी हो गया।"); sheet.remove(); }
+    catch (_) { message("लिंक कॉपी नहीं हो पाया।"); }
+  });
+  addChoice("🟣", "Your Story", async function() {
+    if (typeof window.shortVibeShareReelToStory === "function") {
+      await window.shortVibeShareReelToStory(item, videoUrl);
+      sheet.remove();
+    } else { message("Story विकल्प अभी उपलब्ध नहीं है।"); }
+  });
+  addChoice("⋯", "More apps", async function() {
+    // Opens Android's native share sheet with all compatible installed apps.
+    await nativeShare();
+  });
+  const close = document.createElement("button");
+  close.type = "button";
+  close.className = "sv-share-close";
+  close.textContent = "Cancel";
+  close.addEventListener("click", function() { sheet.remove(); });
+  sheet.addEventListener("click", function(e) { if (e.target === sheet) sheet.remove(); });
+  panel.append(title, grid, close);
+  sheet.appendChild(panel);
+  document.body.appendChild(sheet);
+}
+
+async function loadFeed() {
+      const feed = $("feed");
+      feed.replaceChildren();
+
+      if (!currentUser) {
+        return;
+      }
+
+      feed.textContent = "वीडियो लोड हो रही हैं...";
+
+      try {
+        const { data, error } = await db
+          .from("videos")
+          .select("id, user_id, username, caption, storage_path, created_at")
+          .order("created_at", { ascending: false })
+          .limit(30);
+
+        if (error) {
+          feed.textContent = "Feed Error: " + error.message;
+          return;
+        }
+
+        feed.replaceChildren();
+
+        if (!data || data.length === 0) {
+          feed.textContent =
+            "अभी कोई वीडियो नहीं है। पहला वीडियो Upload करें!";
+          return;
+        }
+
+        for (const item of data) {
+          const { data: urlData } = db.storage
+            .from("shortvibe-videos")
+            .getPublicUrl(item.storage_path);
+
+          const card = document.createElement("div");
+          
+const menuWrap = document.createElement("div");
+menuWrap.className = "sv-video-options-wrap";
+menuWrap.style.cssText =
+  "display:flex;justify-content:flex-end;position:relative;z-index:99999;";
+
+const menuButton = document.createElement("button");
+menuButton.type = "button";
+menuButton.textContent = "⋮";
+menuButton.setAttribute("aria-label", "Video options");
+menuButton.style.cssText =
+  "background:transparent;color:white;font-size:28px;padding:2px 12px;";
+
+const menu = document.createElement("div");
+menu.style.cssText =
+  "display:none;position:absolute;right:0;top:38px;z-index:9999;" +
+  "background:#292936;border:1px solid #555;border-radius:10px;" +
+  "min-width:190px;padding:6px;max-width:80vw;box-shadow:0 8px 24px rgba(0,0,0,.45);";
+
+function closeVideoOptionsMenu() {
+  menu.style.display = "none";
+  card.classList.remove("sv-menu-open");
+  speedRow.style.display = "none";
+  speedOption.textContent = "Playback speed";
+}
+menuButton.addEventListener("click", function (event) {
+  event.stopPropagation();
+  const opening = menu.style.display !== "block";
+  if (opening) {
+    menu.style.display = "block";
+    card.classList.add("sv-menu-open");
+    speedRow.style.display = "none";
+    speedOption.textContent = "Playback speed  ›";
+  } else {
+    closeVideoOptionsMenu();
+  }
+});
+
+menuWrap.append(menuButton, menu);
+
+card.appendChild(menuWrap);
+
+          card.className = "panel feed-card";
+          card.dataset.videoId = String(item.id);
+          card.dataset.userId = String(item.user_id || "");
+          card.dataset.username = String(item.username || "ShortVibe User");
+
+          // Reels screen: arrow-only back button in the upper-left corner.
+          const reelBackButton = document.createElement("button");
+          reelBackButton.type = "button";
+          reelBackButton.className = "sv-reel-back";
+          reelBackButton.textContent = "‹";
+          reelBackButton.setAttribute("aria-label", "Back to Home");
+          reelBackButton.addEventListener("click", function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            if (document.body.classList.contains("sv-comments-open")) return;
+            if (typeof window.shortVibeOpenPage === "function") window.shortVibeOpenPage("home");
+            else document.body.classList.remove("reels-mode");
+          });
+          card.appendChild(reelBackButton);
+
+          const title = document.createElement("p");
+          title.textContent =
+            "@" + (item.username || "ShortVibe User");
+            
+const followButton = document.createElement("button");
+followButton.textContent = "Follow";
+followButton.type = "button";
+followButton.style.margin = "8px 0";
+followButton.style.background = "#ff3867";
+followButton.style.color = "white";
+followButton.style.border = "none";
+followButton.style.borderRadius = "8px";
+followButton.style.padding = "8px 16px";
+
+followButton.addEventListener("click", function () {
+  toggleFollow(item.user_id, followButton);
+});
+
+const videoWrap = document.createElement("div");
+videoWrap.className = "sv-video-wrap";
+videoWrap.style.cssText = "position:relative;width:100%;min-height:240px;background:#000;overflow:hidden;border-radius:12px;";
+
+const video = document.createElement("video");
+video.preload = "metadata";
+video.setAttribute("preload", "metadata");
+video.playsInline = true;
+video.setAttribute("playsinline", "");
+video.controls = false; // Native three-dot menu हटाकर एक ही ShortVibe menu इस्तेमाल करें
+video.autoplay = true;
+video.muted = true;
+video.loop = true;
+video.src = urlData.publicUrl;
+video.setAttribute("src", urlData.publicUrl);
+// Do not force CORS mode for public Supabase Storage video playback; some WebViews reject it.
+video.removeAttribute("crossorigin");
+video.style.cssText = "display:block;width:100%;max-width:100%;background:#000;object-fit:contain;";
+
+const playOverlay = document.createElement("button");
+playOverlay.type = "button";
+playOverlay.textContent = "▶";
+playOverlay.setAttribute("aria-label", "Play video");
+playOverlay.style.cssText = "position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:68px;height:68px;border-radius:50%;border:2px solid white;background:rgba(0,0,0,.58);color:white;font-size:30px;z-index:5;display:flex;align-items:center;justify-content:center;";
+
+const videoErrorBox = document.createElement("div");
+videoErrorBox.className = "sv-video-error";
+videoErrorBox.textContent = "वीडियो लोड नहीं हुई। Retry दबाएँ।";
+videoWrap.appendChild(videoErrorBox);
+
+async function toggleVideoPlayback() {
+  if (video.paused) {
+    try {
+      video.muted = true;
+      if (video.error) {
+        video.load();
+      }
+      await video.play();
+    } catch (err) {
+      playOverlay.textContent = "↻";
+      playOverlay.style.display = "flex";
+      message("वीडियो नहीं चल पाई। इंटरनेट और वीडियो Storage की Public Access जाँचें।");
+      console.warn("Video play error:", err);
+    }
+  } else {
+    video.pause();
+  }
+}
+
+playOverlay.addEventListener("click", function (event) {
+  event.stopPropagation();
+  toggleVideoPlayback();
+});
+video.addEventListener("click", toggleVideoPlayback);
+video.addEventListener("play", function () {
+  playOverlay.style.display = "none";
+  playOverlay.textContent = "▶";
+  videoErrorBox.style.display = "none";
+});
+video.addEventListener("pause", function () {
+  playOverlay.style.display = "flex";
+  playOverlay.textContent = "▶";
+});
+video.addEventListener("ended", function () {
+  playOverlay.style.display = "flex";
+  playOverlay.textContent = "▶";
+});
+video.addEventListener("error", function () {
+  playOverlay.style.display = "flex";
+  playOverlay.textContent = "↻";
+  playOverlay.setAttribute("aria-label", "Retry video");
+  const code = video.error ? video.error.code : "unknown";
+  const reason = ({
+    1: "लोडिंग रद्द हुई",
+    2: "नेटवर्क/इंटरनेट समस्या",
+    3: "वीडियो फ़ॉर्मैट या codec समर्थित नहीं है",
+    4: "वीडियो URL उपलब्ध नहीं है या फ़ाइल समर्थित नहीं है"
+  })[code] || "URL, Storage access या वीडियो फ़ॉर्मैट जाँचें";
+  videoErrorBox.textContent = "वीडियो नहीं चल रही (" + code + "): " + reason + ". Retry दबाएँ।";
+  videoErrorBox.style.display = "block";
+  console.error("ShortVibe video load error:", video.error, video.currentSrc);
+});
+video.addEventListener("stalled", function () {
+  console.warn("ShortVibe video stalled:", video.currentSrc);
+  if (video.readyState < 2 && !videoErrorBox.style.display.includes("block")) {
+    videoErrorBox.textContent = "वीडियो बफ़र हो रही है। इंटरनेट कनेक्शन जाँचें।";
+    videoErrorBox.style.display = "block";
+  }
+});
+video.addEventListener("canplay", function () {
+  videoErrorBox.style.display = "none";
+});
+video.addEventListener("loadedmetadata", function () {
+  videoErrorBox.style.display = "none";
+  if (!document.body.classList.contains("reels-mode")) {
+    video.style.height = "auto";
+  }
+});
+videoWrap.append(video, playOverlay);
+// Autoplay only the video that is actually visible on the Home feed/Reels.
+if (!window.shortVibeVideoObserver && 'IntersectionObserver' in window) {
+  window.shortVibeVideoObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      const v = entry.target;
+      if (entry.isIntersecting && entry.intersectionRatio >= 0.55 && !document.hidden) {
+        document.querySelectorAll('#feed video').forEach(function(other) {
+          if (other !== v) other.pause();
+        });
+        v.muted = true;
+        const promise = v.play();
+        if (promise && promise.catch) promise.catch(function() {
+          const overlay = v.parentElement && v.parentElement.querySelector('[aria-label="Play video"]');
+          if (overlay) overlay.style.display = 'flex';
+        });
+      } else {
+        v.pause();
+      }
+    });
+  }, { threshold: [0.25, 0.55, 0.8] });
+}
+if (window.shortVibeVideoObserver) window.shortVibeVideoObserver.observe(video);
+
+// एक ही तीन-डॉट मेनू: Download, Playback speed और (अपनी वीडियो होने पर) Delete
+function addMenuOption(label, color, handler) {
+  const option = document.createElement("button");
+  option.type = "button";
+  option.textContent = label;
+  option.style.cssText = "display:block;width:100%;text-align:left;background:transparent;color:" + color + ";padding:10px;border:0;border-radius:6px;";
+  option.addEventListener("click", handler);
+  menu.appendChild(option);
+  return option;
+}
+
+addMenuOption("⬇ Download video", "white", function () {
+  menu.style.display = "none";
+  const link = document.createElement("a");
+  link.href = urlData.publicUrl;
+  link.download = "ShortVibe-video-" + item.id + ".mp4";
+  link.target = "_blank";
+  link.rel = "noopener";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+});
+
+const speedOption = document.createElement("button");
+speedOption.type = "button";
+speedOption.textContent = "Playback speed  ›";
+speedOption.style.cssText = "display:block;width:100%;text-align:left;background:transparent;color:white;padding:10px;border:0;border-radius:6px;font-size:15px;";
+menu.appendChild(speedOption);
+const speedRow = document.createElement("div");
+speedRow.className = "sv-speed-submenu";
+speedRow.style.cssText = "display:none;gap:6px;padding:6px 4px;flex-wrap:wrap;";
+const speedBack = document.createElement("button");
+speedBack.type = "button";
+speedBack.textContent = "‹ Back";
+speedBack.style.cssText = "width:100%;text-align:left;background:transparent;color:#c8c8d5;border:0;padding:6px 4px;";
+speedBack.addEventListener("click", function(event) {
+  event.stopPropagation();
+  speedRow.style.display = "none";
+  speedOption.style.display = "block";
+});
+speedRow.appendChild(speedBack);
+[0.5, 1, 1.5, 2].forEach(function (rate) {
+  const rateButton = document.createElement("button");
+  rateButton.type = "button";
+  rateButton.textContent = rate + "×";
+  rateButton.style.cssText = "flex:1 1 40%;background:#444454;color:white;padding:12px 8px;border-radius:8px;border:0;font-size:16px;font-weight:700;";
+  rateButton.addEventListener("click", function (event) {
+    event.stopPropagation();
+    video.playbackRate = rate;
+    speedOption.textContent = "Playback speed · " + rate + "×  ›";
+    closeVideoOptionsMenu();
+    message("Playback speed: " + rate + "×");
+  });
+  speedRow.appendChild(rateButton);
+});
+menu.appendChild(speedRow);
+speedOption.addEventListener("click", function(event) {
+  event.stopPropagation();
+  const showing = speedRow.style.display === "flex";
+  speedRow.style.display = showing ? "none" : "flex";
+  speedOption.style.display = showing ? "block" : "none";
+  if (!showing) {
+    speedRow.style.display = "flex";
+  }
+});
+
+if (currentUser && item.user_id === currentUser.id) {
+  addMenuOption("🗑️ Delete Video", "#ff7070", async function () {
+    menu.style.display = "none";
+    await deleteMyVideo(item, menuButton);
+  });
+}
+
+document.addEventListener("click", function closeVideoMenu(event) {
+  if (!menuWrap.contains(event.target) && menu.style.display === "block") closeVideoOptionsMenu();
+});
+
+// Source load explicitly; show a useful error instead of a permanently blank player
+video.addEventListener("loadeddata", function () {
+  if (document.body.classList.contains("reels-mode")) {
+    video.play().catch(function () { playOverlay.style.display = "flex"; });
+  }
+});
+video.load();
+
+          const caption = document.createElement("p");
+          caption.className = "caption";
+                    caption.textContent = item.caption || "";
+
+          const likeInfo = document.createElement("p");
+          likeInfo.textContent = "❤️ Likes लोड हो रहे हैं...";
+
+          const likeButton = document.createElement("button");
+          likeButton.style.background = "transparent";
+          likeButton.style.border = "none";
+          likeButton.style.fontSize = "18px";
+          likeButton.style.cursor = "pointer";
+
+          // 1. Supabase से कुल लाइक्स की संख्या लाना
+          const { count, error: countError } = await db
+            .from("video_likes")
+            .select("id", { count: "exact", head: true })
+            .eq("video_id", item.id);
+
+          // 2. चेक करना कि क्या इस यूज़र ने पहले से लाइक किया हुआ है
+          const { data: myLike, error: myLikeError } = await db
+            .from("video_likes")
+            .select("id")
+            .eq("video_id", item.id)
+            .eq("user_id", currentUser.id)
+            .maybeSingle();
+
+          let liked = Boolean(myLike);
+          let likesCount = count || 0;
+
+          // शुरुआती UI सेट करना
+          likeButton.textContent = liked ? "❤️" : "♡";
+          likeButton.style.color = liked ? "red" : "white";
+          likeInfo.textContent = "❤️ " + (countError ? "0" : likesCount) + " Likes";
+
+          // Like / Unlike handler
+          likeButton.addEventListener("click", async function () {
+            if (!currentUser) {
+              message("Like करने के लिए पहले Login करें।");
+              return;
+            }
+
+            likeButton.disabled = true;
+            try {
+              if (liked) {
+                const { error } = await db
+                  .from("video_likes")
+                  .delete()
+                  .eq("video_id", item.id)
+                  .eq("user_id", currentUser.id);
+                if (error) throw error;
+                liked = false;
+                likesCount = Math.max(0, likesCount - 1);
+              } else {
+                const { error } = await db
+                  .from("video_likes")
+                  .insert({ video_id: item.id, user_id: currentUser.id });
+                if (error) throw error;
+                liked = true;
+                likesCount += 1;
+              }
+
+              likeButton.textContent = liked ? "❤️" : "♡";
+
+likeButton.style.color = liked ? "red" : "white";
+
+likeButton.style.fontSize = "28px";
+likeButton.style.background = "transparent";
+likeButton.style.border = "none";
+likeButton.style.cursor = "pointer";
+              likeButton.style.color = liked ? "red" : "white";
+              likeInfo.textContent = "❤️ " + likesCount + " Likes";
+            } catch (err) {
+              console.error("Like/Unlike error:", err);
+              message("Like Error: " + (err.message || "कृपया दोबारा कोशिश करें।"));
+            } finally {
+              likeButton.disabled = false;
+            }
+          });
+
+      // ===== ShortVibe Comments शुरू =====
+
+      const commentsSection = document.createElement("div");
+      commentsSection.className = "comments-section";
+
+const commentsBackButton = document.createElement("button");
+
+commentsBackButton.textContent = "‹";
+commentsBackButton.type = "button";
+commentsBackButton.classList.add("sv-comments-back");
+commentsBackButton.style.display = "block";
+commentsBackButton.style.color = "white";
+commentsBackButton.style.background = "#383844";
+commentsBackButton.style.padding = "10px 16px";
+commentsBackButton.style.border = "1px solid white";
+commentsBackButton.style.borderRadius = "8px";
+commentsBackButton.style.position = "relative";
+commentsBackButton.style.zIndex = "10001";
+
+commentsBackButton.textContent = "‹";
+commentsBackButton.style.display = "block";
+commentsBackButton.style.background = "transparent";
+commentsBackButton.style.color = "white";
+commentsBackButton.style.fontSize = "30px";
+commentsBackButton.style.padding = "8px 0";
+commentsBackButton.style.border = "none";
+
+commentsBackButton.addEventListener("click", function (event) {
+  event.stopPropagation();
+
+  closeCommentsPanel();
+});
+
+
+
+      const commentsHeading = document.createElement("h3");
+      commentsHeading.textContent = "💬 Comments";
+
+      
+
+const commentInput = document.createElement("textarea");
+commentInput.placeholder = "अपना comment लिखें...";
+commentInput.maxLength = 500;
+commentInput.rows = 2;
+commentInput.style.height = "auto";
+commentInput.style.minHeight = "48px";
+commentInput.style.maxHeight = "120px";
+commentInput.style.overflowY = "auto";
+commentInput.style.resize = "none";
+
+commentInput.addEventListener("input", function () {
+  this.style.height = "auto";
+  this.style.height =
+    Math.min(this.scrollHeight, 120) + "px";
+});
+commentInput.setAttribute("aria-label", "अपना comment लिखें");
+
+commentInput.style.flex = "1 1 0%";
+commentInput.style.width = "0";
+commentInput.style.minWidth = "0";
+commentInput.style.maxWidth = "100%";
+commentInput.style.boxSizing = "border-box";
+commentInput.style.resize = "none";
+commentInput.style.overflowY = "auto";
+commentInput.style.whiteSpace = "pre-wrap";
+commentInput.style.overflowWrap = "anywhere";
+commentInput.style.fontSize = "16px";
+commentInput.style.lineHeight = "1.4";
+
+
+const commentButton = document.createElement("button");
+commentButton.textContent = "भेजें";
+
+const commentsBox = document.createElement("div");
+commentsBox.id = "commentsBox";
+commentsBox.textContent = "Comments लोड हो रहे हैं...";
+
+// Neeche fixed comment input area
+const commentInputArea = document.createElement("div");
+commentInputArea.className = "comment-input-area";
+
+commentInputArea.append(commentInput, commentButton);
+
+
+commentsSection.append(
+  commentsBackButton,
+  commentsHeading,
+  commentsBox,
+  commentInputArea
+);
+
+  
+async function loadVideoComments() {
+  commentsBox.replaceChildren();
+commentsBox.style.overflowY = "auto";
+commentsBox.style.overscrollBehaviorY = "contain";
+commentsBox.style.touchAction = "pan-y";
+  const { data, error } = await db
+    .from("video_comments")
+    .select("id, user_id, username, comment, created_at, parent_comment_id")
+    .eq("video_id", item.id)
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    commentsBox.textContent = "Comments Error: " + error.message;
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    commentsBox.textContent = "Abhi koi comment nahi hai.";
+    return;
+  }
+
+  // Reply section khula hai ya band, uski state yaad rakhein
+  const openReplies = new Set();
+
+  function addLongPressDelete(row, c) {
+    if (!currentUser || c.user_id !== currentUser.id) return;
+
+    let pressTimer;
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "🗑️ Delete";
+    deleteButton.style.display = "none";
+    deleteButton.style.background = "#dc2626";
+    deleteButton.style.color = "white";
+
+    deleteButton.addEventListener("click", async function (event) {
+      event.stopPropagation();
+
+      if (!confirm("Kya aap yeh comment/reply delete karna chahte hain?")) {
+        deleteButton.style.display = "none";
+        return;
+      }
+
+      const { error: deleteError } = await db
+        .from("video_comments")
+        .delete()
+        .eq("id", c.id)
+        .eq("user_id", currentUser.id);
+
+      if (deleteError) {
+        alert("Delete Error: " + deleteError.message);
+        return;
+      }
+
+      await loadVideoComments();
+    });
+
+    function startPress(event) {
+      if (event.target.closest("button, input")) return;
+
+      clearTimeout(pressTimer);
+      pressTimer = setTimeout(function () {
+        deleteButton.style.display = "inline-block";
+      }, 600);
+    }
+
+    function stopPress() {
+      clearTimeout(pressTimer);
+    }
+
+    row.addEventListener("touchstart", startPress);
+    row.addEventListener("touchend", stopPress);
+    row.addEventListener("touchmove", stopPress);
+    row.addEventListener("mousedown", startPress);
+    row.addEventListener("mouseup", stopPress);
+    row.addEventListener("mouseleave", stopPress);
+
+    row.addEventListener("contextmenu", function (event) {
+      event.preventDefault();
+      deleteButton.style.display = "inline-block";
+    });
+
+    row.appendChild(deleteButton);
+
+    document.addEventListener("click", function (event) {
+      if (
+        !row.contains(event.target) &&
+        deleteButton.style.display === "inline-block"
+      ) {
+        deleteButton.style.display = "none";
+      }
+    });
+  }
+
+  const mainComments = data.filter(function (c) {
+    return c.parent_comment_id === null;
+  });
+
+  for (const c of mainComments) {
+    const replies = data.filter(function (r) {
+      return String(r.parent_comment_id) === String(c.id);
+    });
+
+    const commentRow = document.createElement("div");
+    commentRow.style.padding = "10px 0";
+    commentRow.style.borderBottom = "1px solid #444";
+
+    const user = document.createElement("strong");
+    user.textContent = "@" + (c.username || "ShortVibe User");
+
+    const message = document.createElement("p");
+    message.textContent = c.comment;
+    message.style.margin = "6px 0";
+
+    commentRow.append(user, message);
+
+    // Reply count aur show/hide button
+    const toggleReplies = document.createElement("button");
+    toggleReplies.textContent =
+      replies.length + (replies.length === 1 ? " reply" : " replies");
+
+    toggleReplies.style.background = "transparent";
+    toggleReplies.style.color = "#bfc3cc";
+    toggleReplies.style.padding = "5px 10px";
+
+    const repliesContainer = document.createElement("div");
+    repliesContainer.style.display = "none";
+    repliesContainer.style.marginTop = "8px";
+
+    toggleReplies.addEventListener("click", function (event) {
+      event.stopPropagation();
+
+      if (openReplies.has(String(c.id))) {
+        openReplies.delete(String(c.id));
+        repliesContainer.style.display = "none";
+      } else {
+        openReplies.add(String(c.id));
+        repliesContainer.style.display = "block";
+      }
+    });
+
+    // Reply form
+    const replyButton = document.createElement("button");
+    replyButton.textContent = "Reply";
+    replyButton.style.background = "transparent";
+    replyButton.style.color = "#bfc3cc";
+
+    const replyForm = document.createElement("div");
+    replyForm.style.display = "none";
+    replyForm.style.marginTop = "8px";
+
+    const replyInput = document.createElement("input");
+    replyInput.placeholder = "Reply likhein...";
+    replyInput.maxLength = 500;
+    replyInput.style.width = "100%";
+    replyInput.style.padding = "10px";
+    replyInput.style.boxSizing = "border-box";
+
+    const sendReply = document.createElement("button");
+    sendReply.textContent = "Reply bhejein";
+
+    replyButton.addEventListener("click", function (event) {
+      event.stopPropagation();
+
+      replyForm.style.display =
+        replyForm.style.display === "none" ? "block" : "none";
+
+      if (replyForm.style.display === "block") {
+        replyInput.focus();
+      }
+    });
+
+    sendReply.addEventListener("click", async function () {
+      const replyText = replyInput.value.trim();
+
+      if (!replyText) {
+        alert("Pehle reply likhein.");
+        return;
+      }
+
+      if (!currentUser) {
+        alert("Reply karne ke liye login karein.");
+        return;
+      }
+
+      sendReply.disabled = true;
+
+      try {
+        const username =
+          currentUser.user_metadata?.username ||
+          currentUser.email?.split("@")[0] ||
+          "ShortVibe User";
+
+        const { error: replyError } = await db
+          .from("video_comments")
+          .insert({
+            video_id: item.id,
+            user_id: currentUser.id,
+            username: username,
+            comment: replyText,
+            parent_comment_id: c.id
+          });
+
+        if (replyError) throw replyError;
+
+        openReplies.add(String(c.id));
+        await loadVideoComments();
+
+      } catch (err) {
+        alert("Reply Error: " + err.message);
+      } finally {
+        sendReply.disabled = false;
+      }
+    });
+
+    replyForm.append(replyInput, sendReply);
+    commentRow.append(toggleReplies, replyButton, replyForm);
+
+    addLongPressDelete(commentRow, c);
+    commentsBox.appendChild(commentRow);
+
+    // Replies ko alag container mein rakhein
+    for (const r of replies) {
+      const replyRow = document.createElement("div");
+      replyRow.style.marginLeft = "24px";
+      replyRow.style.padding = "8px";
+      replyRow.style.borderLeft = "2px solid #777";
+
+      const replyUser = document.createElement("strong");
+      replyUser.textContent = "@" + (r.username || "ShortVibe User");
+
+      const replyMessage = document.createElement("p");
+      replyMessage.textContent = r.comment;
+      replyMessage.style.margin = "5px 0";
+
+      replyRow.append(replyUser, replyMessage);
+
+      // Apne reply par long press se Delete
+      addLongPressDelete(replyRow, r);
+
+      repliesContainer.appendChild(replyRow);
+    }
+
+    if (openReplies.has(String(c.id))) {
+      repliesContainer.style.display = "block";
+    }
+
+    commentsBox.appendChild(repliesContainer);
+  }
+}
+
+
+
+      commentButton.addEventListener("click", async function () {
+        const commentText = commentInput.value.trim();
+
+        if (!commentText) {
+          alert("पहले comment लिखें।");
+          return;
+        }
+
+        commentButton.disabled = true;
+
+        try {
+          const username =
+            currentUser.user_metadata?.username ||
+            currentUser.email?.split("@")[0] ||
+            "ShortVibe User";
+
+          const { error } = await db
+            .from("video_comments")
+            .insert({
+              video_id: item.id,
+              user_id: currentUser.id,
+              username: username,
+              comment: commentText
+            });
+
+          if (error) {
+            throw error;
+          }
+
+          commentInput.value = "";
+          await loadVideoComments();
+
+        } catch (err) {
+          alert("Comment Error: " + err.message);
+        } finally {
+          commentButton.disabled = false;
+        }
+      });
+
+      
+
+      // पहली बार comments लोड करें
+    
+
+      // ===== ShortVibe Comments खत्म =====
+
+          
+          // Like और Comment के बटन एक लाइन में
+          const actionRow = document.createElement("div");
+          actionRow.className = "sv-reel-actions";
+          actionRow.style.display = "flex";
+          actionRow.style.alignItems = "center";
+          actionRow.style.gap = "20px";
+          actionRow.style.marginTop = "12px";
+
+          // Like का लोगो और गिनती
+          likeInfo.textContent = "❤️ " + likesCount;
+          likeInfo.style.margin = "0";
+          likeInfo.style.fontSize = "20px";
+
+          // Comment का सिर्फ लोगो
+          const commentToggle = document.createElement("button");
+          commentToggle.textContent = "💬";
+          commentToggle.title = "Comments खोलें";
+
+          // Comment दबाने पर Comments खोलें/बंद करें
+          commentsSection.style.display = "none";
+
+  
+function closeCommentsPanel() {
+  commentsSection.classList.remove("open");
+  document.body.classList.remove("sv-comments-open");
+  commentsSection.style.bottom = "0";
+  commentsSection.style.height = "70vh";
+  commentsSection.style.maxHeight = "70vh";
+  videoWrap.style.pointerEvents = "";
+  setTimeout(function () {
+    if (!commentsSection.classList.contains("open")) commentsSection.style.display = "none";
+  }, 300);
+  if (document.body.classList.contains("reels-mode")) {
+    // Let the Reels observer resume the visible video after the panel closes.
+    setTimeout(function () {
+      if (reelsVideoObserver) reelsVideoObserver.takeRecords();
+      if (!document.body.classList.contains("sv-comments-open") &&
+          document.body.classList.contains("reels-mode")) {
+        video.play().catch(function () { playOverlay.style.display = "flex"; });
+      }
+    }, 350);
+  }
+}
+function openCommentsPanel() {
+  commentsSection.style.display = "flex";
+  document.body.classList.add("sv-comments-open");
+  video.pause();
+  requestAnimationFrame(function () { commentsSection.classList.add("open"); });
+  loadVideoComments();
+}
+commentToggle.addEventListener("click", function (event) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (commentsSection.classList.contains("open")) closeCommentsPanel();
+  else openCommentsPanel();
+});
+
+// Stop touch gestures from bubbling to the Reels/feed swipe handler.
+// Do not preventDefault: native scrolling inside comments must still work.
+["touchstart", "touchmove", "touchend", "pointerdown", "pointermove", "pointerup", "wheel"].forEach(function (type) {
+  commentsSection.addEventListener(type, function (event) { event.stopPropagation(); }, { passive: true });
+});
+commentsBox.addEventListener("touchstart", function (event) { event.stopPropagation(); }, { passive: true });
+commentsBox.addEventListener("touchmove", function (event) { event.stopPropagation(); }, { passive: true });
+commentInput.addEventListener("touchstart", function (event) { event.stopPropagation(); }, { passive: true });
+commentInput.addEventListener("touchmove", function (event) { event.stopPropagation(); }, { passive: true });
+
+// Keep the comments sheet and input visible when the Android keyboard opens.
+function syncCommentsViewport() {
+  if (!commentsSection.classList.contains("open")) return;
+  const vv = window.visualViewport;
+  if (vv) {
+    const keyboardBottom = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+    commentsSection.style.bottom = keyboardBottom + "px";
+    commentsSection.style.height = Math.max(220, vv.height * 0.82) + "px";
+    commentsSection.style.maxHeight = Math.max(220, vv.height * 0.82) + "px";
+  }
+}
+if (window.visualViewport) {
+  window.visualViewport.addEventListener("resize", syncCommentsViewport);
+  window.visualViewport.addEventListener("scroll", syncCommentsViewport);
+}
+commentInput.addEventListener("focus", function () {
+  setTimeout(syncCommentsViewport, 100);
+  setTimeout(syncCommentsViewport, 350);
+});
+commentInput.addEventListener("blur", function () {
+  commentsSection.style.bottom = "0";
+  commentsSection.style.height = "70vh";
+  commentsSection.style.maxHeight = "70vh";
+});
+
+
+          // Save / Bookmark: is device par saved videos ki list
+          const saveButton = document.createElement("button");
+          saveButton.type = "button";
+          saveButton.style.cssText = "background:transparent;border:1px solid #555;color:white;padding:8px 10px;width:auto;";
+          const savedKey = "shortvibe_saved_" + currentUser.id;
+          function readSavedVideos() {
+            try { return JSON.parse(localStorage.getItem(savedKey) || "[]"); }
+            catch (_) { return []; }
+          }
+          function updateSaveLabel() {
+            const saved = readSavedVideos().includes(String(item.id));
+            saveButton.textContent = saved ? "🔖 Saved" : "🔖 Save";
+          }
+          updateSaveLabel();
+          saveButton.addEventListener("click", function () {
+            const saved = readSavedVideos();
+            const id = String(item.id);
+            const index = saved.indexOf(id);
+            if (index >= 0) saved.splice(index, 1);
+            else saved.push(id);
+            localStorage.setItem(savedKey, JSON.stringify(saved));
+            updateSaveLabel();
+            message(index >= 0 ? "Saved list से वीडियो हटा दी गई।" : "वीडियो Saved list में जोड़ दी गई।");
+          });
+
+          // Share: Android share sheet ya link copy
+          const shareButton = document.createElement("button");
+          shareButton.type = "button";
+          shareButton.textContent = "↗ Share";
+          shareButton.style.cssText = "background:transparent;border:1px solid #555;color:white;padding:8px 10px;width:auto;";
+          shareButton.addEventListener("click", function () {
+            openShortVibeShareSheet(item, urlData.publicUrl);
+          });
+
+          actionRow.append(likeInfo, likeButton, commentToggle, saveButton, shareButton);
+
+card.append(title, followButton, videoWrap, caption, actionRow, commentsSection);
+
+          
+          feed.appendChild(card);
+
+if (reelsVideoObserver) {
+  reelsVideoObserver.observe(video);
+}
+
+
+        }
+      } catch (err) {
+        feed.textContent = "Feed Error: " + err.message;
+      }
+    }
+
+    $("refreshBtn").addEventListener("click", loadFeed);
+
+    // 9. START APP
+    async function startApp() {
+      // Login panel शुरुआत में दिखाएँ
+      showUser(null);
+
+      if (!window.supabase) {
+        message("Supabase लाइब्रेरी लोड नहीं हुई। इंटरनेट जाँचें।");
+        return;
+      }
+
+      if (
+        !SUPABASE_KEY ||
+        SUPABASE_KEY === "YOUR_PUBLISHABLE_KEY"
+      ) {
+        message("पहले अपनी Supabase Publishable API Key डालें।");
+        return;
+      }
+
+      try {
+        db = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_KEY
+        );
+
+        await refreshUser();
+
+        if (currentUser) {
+          await loadFeed();
+        }
+
+        db.auth.onAuthStateChange(function (_event, session) {
+          showUser(session ? session.user : null);
+        });
+      } catch (err) {
+        showUser(null);
+        message("App Error: " + err.message);
+      }
+    }
+
+    startApp();
+  </script>
+
+<style id="sv-facebook-profile-style">
+  .sv-facebook-profile { padding:0 0 18px !important; overflow:hidden; }
+  .sv-cover-photo { height:190px; position:relative; display:flex; align-items:center; justify-content:center; overflow:hidden; background:linear-gradient(135deg,#28213e,#572b57 48%,#ff3867); background-size:cover; background-position:center; border-radius:14px 14px 0 0; }
+  .sv-cover-photo span { font-size:clamp(28px,7vw,42px); font-weight:900; color:#fff; text-shadow:0 2px 14px #0008; }
+  .sv-cover-change { position:absolute; right:12px; bottom:12px; display:flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; background:#24242c; cursor:pointer; }
+  .sv-visually-hidden-input { position:absolute !important; width:1px !important; height:1px !important; opacity:0 !important; overflow:hidden !important; pointer-events:none !important; }
+  .sv-profile-head { display:flex; align-items:flex-end; gap:14px; padding:0 16px; margin-top:-48px; position:relative; z-index:2; }
+  .sv-avatar-wrap { position:relative; flex:0 0 112px; width:112px; height:112px; }
+  .sv-profile-photo { display:block; width:112px !important; height:112px !important; border-radius:50% !important; object-fit:cover; border:5px solid #22222c !important; background:#414153; }
+  .sv-avatar-camera { position:absolute; right:2px; bottom:4px; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#414153; border:2px solid #22222c; cursor:pointer; }
+  .sv-profile-heading { min-width:0; padding-bottom:8px; }
+  .sv-profile-heading h2 { margin:0 0 5px; font-size:clamp(21px,5vw,29px); overflow-wrap:anywhere; }
+  .sv-profile-heading p { margin:0; color:#c5c5d0; font-size:14px; }
+  .sv-profile-stats { display:flex; gap:0; padding:16px 18px 8px; margin:0 !important; }
+  .sv-profile-stats > div { flex:1; display:flex; flex-direction:column; gap:3px; }
+  .sv-profile-stats strong { font-size:21px; }
+  .sv-profile-stats span { color:#c5c5d0; font-size:13px; }
+  .sv-profile-bio { margin:8px 18px 14px; line-height:1.5; color:#f4f4f5; }
+  .sv-profile-actions { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:0 14px 12px; }
+  .sv-profile-actions button { margin:0; min-height:44px; padding:8px; font-size:14px; }
+  .sv-profile-tabs { border-top:1px solid #414153; padding:12px 12px 0; margin:0 0 12px !important; }
+  .sv-facebook-profile #svProfileTabInfo, .sv-facebook-profile #svProfilePosts, .sv-facebook-profile #svCollabPanel { margin-left:14px; margin-right:14px; }
+  @media(max-width:380px) { .sv-cover-photo{height:155px} .sv-profile-head{gap:9px;padding:0 10px} .sv-avatar-wrap,.sv-profile-photo{width:92px !important;height:92px !important;flex-basis:92px} .sv-profile-heading h2{font-size:20px} }
+</style>
+<style id="sv-profile-only-polish">
+  /* Profile-only visual refresh. Bottom navigation styles are intentionally untouched. */
+  #profilePanel.sv-facebook-profile { background:#fff !important; color:#151515 !important; border-radius:18px !important; margin:12px 0 18px !important; padding:0 0 18px !important; }
+  #profilePanel.sv-facebook-profile .sv-cover-photo { height:190px !important; border-radius:18px 18px 0 0 !important; background-image:linear-gradient(135deg,#d9e5ef,#9fb8d2 48%,#526c89) !important; }
+  #profilePanel.sv-facebook-profile .sv-cover-photo span { color:#fff !important; text-shadow:0 2px 10px #0009 !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-head { display:flex !important; flex-direction:column !important; align-items:center !important; gap:8px !important; margin-top:-58px !important; padding:0 16px !important; text-align:center !important; }
+  #profilePanel.sv-facebook-profile .sv-avatar-wrap { flex:0 0 124px !important; width:124px !important; height:124px !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-photo { width:124px !important; height:124px !important; border:5px solid #fff !important; background:#e4e7eb !important; }
+  #profilePanel.sv-facebook-profile .sv-avatar-camera { background:#e4e7eb !important; color:#111 !important; border:2px solid #fff !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-heading { width:100% !important; padding:0 !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-heading h2 { color:#111 !important; font-size:27px !important; line-height:1.2 !important; margin:2px 0 5px !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-heading p { color:#555 !important; font-size:14px !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-stats { display:flex !important; justify-content:space-around !important; text-align:center !important; padding:16px 12px 8px !important; border-bottom:1px solid #e5e7eb !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-stats > div { align-items:center !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-stats strong { color:#111 !important; font-size:20px !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-stats span { color:#555 !important; font-size:13px !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-bio { color:#222 !important; text-align:center !important; margin:14px 18px !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-actions { grid-template-columns:1fr 1fr !important; padding:0 14px 14px !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-actions button:first-child { background:#1877f2 !important; color:#fff !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-actions button:last-child { background:#e4e6eb !important; color:#111 !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-tabs { background:#fff !important; border-top:1px solid #e5e7eb !important; padding:10px 10px 0 !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-tabs button { background:#f0f2f5 !important; color:#444 !important; min-height:42px !important; }
+  #profilePanel.sv-facebook-profile .sv-profile-tabs button.active { background:#dbeafe !important; color:#1877f2 !important; }
+  #profilePanel.sv-facebook-profile #svProfileTabInfo { color:#555 !important; }
+  #profilePanel.sv-facebook-profile #svCollabPanel input { background:#f0f2f5 !important; color:#111 !important; }
+  #profilePanel.sv-facebook-profile #svCollabPanel button { background:#1877f2 !important; }
+  /* When Profile is open, don't show the separate Upload form below it. */
+  #profilePanel:not(.hidden) ~ #uploadPanel { display:none !important; }
+  @media(max-width:380px) {
+    #profilePanel.sv-facebook-profile .sv-cover-photo { height:165px !important; }
+    #profilePanel.sv-facebook-profile .sv-avatar-wrap,
+    #profilePanel.sv-facebook-profile .sv-profile-photo { width:108px !important; height:108px !important; flex-basis:108px !important; }
+    #profilePanel.sv-facebook-profile .sv-profile-heading h2 { font-size:23px !important; }
+  }
+</style>
+<script id="sv-facebook-profile-behavior">
+(function(){
+  const $ = id => document.getElementById(id);
+  const profile = $('profilePanel');
+  if (!profile) return;
+  function getUserKey(suffix){ return 'shortvibe_' + suffix + '_' + ((window.currentUser && window.currentUser.id) || 'guest'); }
+  function refreshProfileHeader(){
+    const user=window.currentUser;
+    const name=(user && (user.user_metadata && (user.user_metadata.display_name || user.user_metadata.full_name))) || (user && user.email ? user.email.split('@')[0] : 'ShortVibe User');
+    if ($('svProfileDisplayName')) $('svProfileDisplayName').textContent=name;
+    if ($('profileName')) $('profileName').textContent='@'+name.replace(/\s+/g,'');
+    try { const saved=localStorage.getItem(getUserKey('profile_photo')); if(saved && $('svProfilePhoto')) $('svProfilePhoto').src=saved; } catch(e){}
+    try { const cover=localStorage.getItem(getUserKey('cover_photo')); if(cover){const el=profile.querySelector('.sv-cover-photo');if(el){el.style.backgroundImage='url("'+cover+'")';const title=el.querySelector('span');if(title)title.style.display='none';}} } catch(e){}
+    const count=profile.querySelectorAll('#svProfilePosts .feed-card').length;
+    if($('svPostCount')) $('svPostCount').textContent=String(count);
+  }
+  const photoInput=$('svProfilePhotoInput');
+  photoInput && photoInput.addEventListener('change',function(){const f=this.files&&this.files[0];if(!f)return;if(!f.type.startsWith('image/'))return alert('कृपया फोटो चुनें।');if(f.size>1500000)return alert('1.5 MB से छोटी फोटो चुनें।');const rd=new FileReader();rd.onload=()=>{try{localStorage.setItem(getUserKey('profile_photo'),rd.result);$('svProfilePhoto').src=rd.result;}catch(e){alert('फोटो सेव नहीं हुई। छोटी फोटो चुनें।')}};rd.readAsDataURL(f);});
+  const coverInput=$('svCoverPhotoInput');
+  coverInput && coverInput.addEventListener('change',function(){const f=this.files&&this.files[0];if(!f)return;if(!f.type.startsWith('image/'))return alert('कृपया फोटो चुनें।');if(f.size>1800000)return alert('1.8 MB से छोटी cover photo चुनें।');const rd=new FileReader();rd.onload=()=>{try{localStorage.setItem(getUserKey('cover_photo'),rd.result);const el=profile.querySelector('.sv-cover-photo');if(el)el.style.backgroundImage='url("'+rd.result+'")';const title=el&&el.querySelector('span');if(title)title.style.display='none';}catch(e){alert('Cover photo सेव नहीं हुई। छोटी फोटो चुनें।')}};rd.readAsDataURL(f);});
+  $('svAddStoryProfile')?.addEventListener('click',function(){if($('svAddStory')) $('svAddStory').click();else alert('Story जोड़ने का विकल्प Home पेज पर उपलब्ध है।');});
+  $('svProfileMoreBtn')?.addEventListener('click',function(){const bio=prompt('अपनी प्रोफ़ाइल Bio लिखें:', $('svProfileBio')?.textContent||'');if(bio===null)return;if($('svProfileBio'))$('svProfileBio').textContent=bio;try{localStorage.setItem(getUserKey('profile_bio'),bio);}catch(e){}});
+  document.addEventListener('click',function(e){if(e.target.closest('[data-page="profile"]'))setTimeout(refreshProfileHeader,100);});
+  const observer=new MutationObserver(refreshProfileHeader);observer.observe(profile,{attributes:true,attributeFilter:['class']});
+  refreshProfileHeader();
+})();
+</script>
+
+  <nav id="bottomNav" aria-label="ShortVibe navigation">
+    <button type="button" data-page="home" class="active" aria-label="Home" title="Home"><span class="sv-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21H4V10.5M9 21v-7h6v7"/></svg></span><span>Home</span></button>
+    <button type="button" data-page="search" aria-label="Search" title="Search"><span class="sv-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="7.2"/><path d="m16.2 16.2 5 5"/></svg></span><span>Search</span></button>
+    <button type="button" data-page="upload" aria-label="Create" title="Create"><span class="sv-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 7v10M7 12h10"/></svg></span><span>Create</span></button>
+    <button type="button" data-page="reels" aria-label="Reels" title="Reels"><span class="sv-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 4l4 5M15 4l4 5"/><path d="m10 12 5 3-5 3z"/></svg></span><span>Reels</span></button>
+    <button type="button" data-page="profile" aria-label="Profile" title="Profile"><span class="sv-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.5-4.2 3.5-6.5 8-6.5s7.5 2.3 8 6.5"/></svg></span><span>Profile</span></button>
+    <button type="button" data-page="messages" aria-label="Messages" title="Messages"><span class="sv-nav-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H9l-5 3v-3.2a2 2 0 0 1-2-1.8v-9a2 2 0 0 1 2-2Z"/><path d="m4 7 8 6 8-6"/></svg></span><span>Messages</span></button>
+  </nav>
+<script>
+(function () {
+  const nav = document.getElementById("bottomNav");
+  if (!nav) return;
+
+  const profile = document.getElementById("profilePanel");
+  const upload = document.getElementById("uploadPanel");
+  const feedPanel = document.getElementById("feedPanel");
+  const feed = document.getElementById("feed");
+
+  let searchInput = null;
+
+  function openPage(page) {
+    document.body.classList.toggle("reels-mode", page === "reels");
+    document.body.classList.toggle("sv-home-page", page === "home");
+    nav.style.setProperty("display", page === "home" && currentUser ? "grid" : "none", "important");
+    
+if (page === "reels") {
+  setupReelsAutoPlay();
+} else {
+  document.querySelectorAll("#feed video").forEach(function(video) {
+    video.pause();
+  });
+}
+
+   if (!currentUser && (page === "upload" || page === "profile")) {
+  const auth = document.getElementById("authPanel");
+
+  if (auth) {
+    auth.classList.remove("hidden");
+  }
+
+  const msg = document.getElementById("message");
+
+  if (msg) {
+    msg.textContent = "Upload या Profile के लिए पहले Login करें।";
+  }
+
+  window.scrollTo(0, 0);
+  return;
+}
+
+    profile.classList.add("hidden");
+    upload.classList.add("hidden");
+    feedPanel.classList.add("hidden");
+const settings = document.getElementById("settingsPanel");
+if (settings) settings.classList.add("hidden");
+    nav.querySelectorAll("button").forEach(function (button) {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
+    });
+
+if (page === "profile") {
+  profile.classList.remove("hidden");
+} else if (page === "settings") {
+  if (settings) settings.classList.remove("hidden");
+} else if (page === "upload") {
+  upload.classList.remove("hidden");
+} else {
+
+    
+      feedPanel.classList.remove("hidden");
+
+      if (page === "saved") {
+        if (searchInput) searchInput.style.display = "none";
+        const savedKey = "shortvibe_saved_" + currentUser.id;
+        let savedIds = [];
+        try { savedIds = JSON.parse(localStorage.getItem(savedKey) || "[]"); } catch (_) {}
+        feed.querySelectorAll(".feed-card").forEach(function (card) {
+          card.style.display = savedIds.includes(String(card.dataset.videoId)) ? "" : "none";
+        });
+        if (!savedIds.length) feed.textContent = "अभी कोई Saved वीडियो नहीं है। Feed में 🔖 Save दबाएँ।";
+      } else if (page === "search") {
+        if (!searchInput) {
+          searchInput = document.createElement("input");
+          searchInput.type = "search";
+          searchInput.placeholder = "Username या Caption खोजें...";
+          searchInput.id = "feedSearch";
+
+          searchInput.addEventListener("input", function () {
+            const query = searchInput.value.toLowerCase();
+
+            feed.querySelectorAll(".feed-card").forEach(function (card) {
+              card.style.display = card.textContent
+                .toLowerCase()
+                .includes(query) ? "" : "none";
+            });
+          });
+        }
+
+        feedPanel.insertBefore(searchInput, feed);
+        searchInput.style.display = "block";
+      } else if (page !== "saved") {
+        if (searchInput) searchInput.style.display = "none";
+
+        feed.querySelectorAll(".feed-card").forEach(function (card) {
+          card.style.display = "";
+        });
+      }
+
+      if (page === "reels") {
+        feed.querySelectorAll(".feed-card video").forEach(function (video) {
+          video.style.height = "65vh";
+          video.style.objectFit = "contain";
+        });
+      } else {
+        feed.querySelectorAll(".feed-card video").forEach(function (video) {
+          video.style.height = "";
+          video.style.objectFit = "";
+        });
+      }
+    }
+
+    window.scrollTo(0, 0);
+  }
+
+  nav.addEventListener("click", function (event) {
+    const button = event.target.closest("button[data-page]");
+    if (!button) return;
+    nav.querySelectorAll("button[data-page]").forEach(function (item) {
+      item.classList.toggle("active", item === button);
+    });
+    if (button.dataset.page === "messages" && typeof window.shortVibeOpenMessages === "function") {
+      window.shortVibeOpenMessages();
+    } else {
+      openPage(button.dataset.page);
+    }
+  });
+
+  window.shortVibeOpenPage = openPage;
+})();
+
+/* ShortVibe Intro: hide after 3 seconds */
+(function () {
+  const intro = document.getElementById("svIntro");
+  if (!intro) return;
+
+  function hideIntro() {
+    intro.classList.add("svIntroHide");
+
+    setTimeout(function () {
+      if (intro.parentNode) {
+        intro.parentNode.removeChild(intro);
+      }
+    }, 600);
+  }
+
+  setTimeout(hideIntro, 3000);
+})();
+
+</script>
+
+
+<script>
+document.addEventListener("click", function (event) {
+  const target = event.target.closest("#bottomNav button, #bottomNav a");
+  if (!target) return;
+  const label = (target.innerText || target.textContent || "").toLowerCase();
+  if (label.includes("reels") || label.includes("🎬")) {
+    document.body.classList.add("reels-mode");
+  } else if (
+    label.includes("home") || label.includes("search") ||
+    label.includes("upload") || label.includes("profile") ||
+    label.includes("saved") || label.includes("settings")
+  ) {
+    document.body.classList.remove("reels-mode");
+  }
+});
+</script>
+
+
+<script>
+(function () {
+  function fixReelsLikeCount() {
+    if (!document.body.classList.contains("reels-mode")) return;
+    document.querySelectorAll("#feed .feed-card").forEach(function (card) {
+      var stack = card.querySelector('div[style*="align-items: center"]');
+      if (!stack) return;
+      var heart = Array.from(stack.querySelectorAll("button")).find(function (btn) {
+        return /❤️|❤|like/i.test(btn.textContent || "");
+      });
+      if (!heart) return;
+
+      // Find the separate likes text label; keep its count and move it under the heart.
+      var candidates = Array.from(card.querySelectorAll("p, span, div"))
+        .filter(function (el) {
+          if (el === stack || stack.contains(el)) return false;
+          if (el.querySelector("button")) return false;
+          return /\b\d+\s*Likes?\b/i.test(el.textContent || "") &&
+                 (el.textContent || "").trim().length < 40;
+        });
+      if (!candidates.length) return;
+      var label = candidates.sort(function (a, b) {
+        return (a.textContent || "").length - (b.textContent || "").length;
+      })[0];
+
+      // Never show the word "Liked" on the Reels heart button.
+      heart.textContent = /liked/i.test(heart.textContent || "") ? "❤️" : heart.textContent;
+      if (/like/i.test(heart.textContent || "") && !/❤️|❤/.test(heart.textContent || "")) {
+        heart.textContent = "♡";
+      }
+
+      label.classList.add("reels-like-count");
+      label.style.setProperty("display", "block", "important");
+      label.style.setProperty("position", "static", "important");
+      label.style.setProperty("inset", "auto", "important");
+      label.style.setProperty("order", "2", "important");
+      label.style.setProperty("width", "62px", "important");
+      label.style.setProperty("margin", "-8px 0 4px", "important");
+      label.style.setProperty("text-align", "center", "important");
+      label.style.setProperty("color", "#fff", "important");
+      label.style.setProperty("font-size", "12px", "important");
+      label.style.setProperty("z-index", "200", "important");
+
+      // Keep the action stack order: Like heart, count, Comment, Save, Share.
+      var buttons = Array.from(stack.querySelectorAll("button"));
+      var comment = buttons.find(function (btn) { return /💬|comment/i.test(btn.textContent || "") || /comment/i.test(btn.title || ""); });
+      var save = buttons.find(function (btn) { return /save|🔖|📌/i.test(btn.textContent || "") || /save/i.test(btn.title || ""); });
+      var share = buttons.find(function (btn) { return /share|↗/i.test(btn.textContent || "") || /share/i.test(btn.title || ""); });
+      // Re-appending moves each existing element; its click handlers are preserved.
+      stack.appendChild(heart);
+      if (label.parentElement !== stack) stack.appendChild(label);
+      else stack.appendChild(label);
+      if (comment) stack.appendChild(comment);
+      if (save) stack.appendChild(save);
+      if (share) stack.appendChild(share);
+    });
+  }
+  document.addEventListener("DOMContentLoaded", fixReelsLikeCount);
+  document.addEventListener("click", function () {
+    setTimeout(fixReelsLikeCount, 120);
+  });
+  var observer = new MutationObserver(fixReelsLikeCount);
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+})();
+</script>
+
+
+<script>
+/* ShortVibe feature layer: stories, profile tabs, home-only navigation and local message draft */
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const nav = $('bottomNav');
+  const feedPanel = $('feedPanel');
+  const profilePanel = $('profilePanel');
+  const messagesPanel = $('svMessagesPanel');
+  let currentProfileTab = 'posts';
+
+  function userKey(suffix) { return 'shortvibe_' + suffix + '_' + ((window.currentUser && window.currentUser.id) || 'guest'); }
+  function safeRead(key, fallback) { try { return JSON.parse(localStorage.getItem(key) || JSON.stringify(fallback)); } catch (_) { return fallback; } }
+  function safeWrite(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); return true; } catch (_) { alert('Storage भर गया है। कुछ पुरानी Story/Message हटाएँ।'); return false; } }
+
+  function showBackButtons(show) {
+    document.querySelectorAll('[data-sv-back]').forEach(el => el.classList.toggle('hidden', !show));
+  }
+  function setHomeOnlyNav(page) {
+    document.body.classList.toggle('sv-home-page', page === 'home');
+    if (nav) nav.style.display = (window.currentUser && page === 'home') ? 'grid' : 'none';
+    showBackButtons(page !== 'home');
+  }
+
+  function openStoryMediaDB() {
+    return new Promise((resolve, reject) => {
+      if (!('indexedDB' in window)) return reject(new Error('IndexedDB उपलब्ध नहीं है'));
+      const req = indexedDB.open('ShortVibeStoryMedia', 1);
+      req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains('media')) req.result.createObjectStore('media'); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error || new Error('Story storage नहीं खुला'));
+    });
+  }
+  async function saveStoryBlob(key, blob) {
+    const dbi = await openStoryMediaDB();
+    return new Promise((resolve, reject) => {
+      const tx = dbi.transaction('media', 'readwrite');
+      tx.objectStore('media').put(blob, key);
+      tx.oncomplete = () => { dbi.close(); resolve(true); };
+      tx.onerror = () => { dbi.close(); reject(tx.error); };
+    });
+  }
+  async function getStoryBlob(key) {
+    const dbi = await openStoryMediaDB();
+    return new Promise((resolve, reject) => {
+      const tx = dbi.transaction('media', 'readonly');
+      const req = tx.objectStore('media').get(key);
+      req.onsuccess = () => { const value = req.result || null; dbi.close(); resolve(value); };
+      req.onerror = () => { dbi.close(); reject(req.error); };
+    });
+  }
+  function showStoryViewer(story) {
+    const old = document.getElementById('svStoryViewer'); if (old) old.remove();
+    const overlay = document.createElement('div'); overlay.id='svStoryViewer';
+    overlay.style.cssText='position:fixed;inset:0;z-index:100001;background:#050508;display:flex;align-items:center;justify-content:center;padding:16px;';
+    const close = document.createElement('button'); close.type='button'; close.textContent='×'; close.style.cssText='position:absolute;right:12px;top:12px;width:44px;height:44px;font-size:30px;background:#292936;z-index:2;'; close.onclick=()=>overlay.remove();
+    const caption = document.createElement('div'); caption.textContent=story.text || ('@'+(story.username||'You')); caption.style.cssText='position:absolute;left:16px;bottom:24px;right:16px;color:white;font-size:17px;z-index:2;overflow-wrap:anywhere;';
+    overlay.append(close);
+    (async()=>{
+      let mediaUrl = story.videoUrl || '';
+      if (story.mediaKey) { try { const blob=await getStoryBlob(story.mediaKey); if(blob) mediaUrl=URL.createObjectURL(blob); } catch(e){} }
+      if (mediaUrl) {
+        const isVideo = story.type === 'video' || /\.(mp4|webm|mov)(\?|$)/i.test(mediaUrl) || (story.videoUrl && !story.mediaKey);
+        const media = document.createElement(isVideo ? 'video' : 'img'); media.src=mediaUrl;
+        if (isVideo) { media.autoplay=true; media.muted=true; media.loop=false; media.playsInline=true; media.controls=true; media.style.cssText='max-width:100%;max-height:82vh;object-fit:contain;'; }
+        else media.style.cssText='max-width:100%;max-height:82vh;object-fit:contain;';
+        overlay.insertBefore(media, close);
+      }
+      overlay.appendChild(caption);
+    })();
+    overlay.addEventListener('click', e=>{if(e.target===overlay)overlay.remove();});
+    document.body.appendChild(overlay);
+  }
+  async function renderStories() {
+    const host = $('svStories'); if (!host) return;
+    host.replaceChildren();
+    const now = Date.now();
+    const stories = safeRead(userKey('stories'), []).filter(s => now - s.createdAt < 86400000);
+    safeWrite(userKey('stories'), stories);
+    const add = document.createElement('button'); add.type='button'; add.className='sv-story'; add.style.cssText='background:transparent;padding:0;width:76px;';
+    add.innerHTML = '<span class="sv-story-ring"><span class="sv-story-letter">＋</span></span><span>Your Story</span>';
+    add.addEventListener('click', addStory); host.appendChild(add);
+    stories.slice().reverse().forEach(story => {
+      const item = document.createElement('button'); item.type='button'; item.className='sv-story'; item.style.cssText='background:transparent;padding:0;width:76px;';
+      const ring = document.createElement('span'); ring.className='sv-story-ring';
+      if (story.image) { const img=document.createElement('img'); img.src=story.image; img.alt='Story'; ring.appendChild(img); }
+      else if (story.mediaKey) {
+        const letter=document.createElement('span'); letter.className='sv-story-letter'; letter.textContent=story.type==='video'?'▶':'▧'; ring.appendChild(letter);
+        getStoryBlob(story.mediaKey).then(blob=>{ if(blob && ring.isConnected) { const mediaUrl=URL.createObjectURL(blob); if(story.type==='image'){ const img=document.createElement('img');img.src=mediaUrl;img.alt='Story';ring.replaceChildren(img); } } }).catch(()=>{});
+      } else if (story.videoUrl) { const letter=document.createElement('span'); letter.className='sv-story-letter'; letter.textContent='▶'; ring.appendChild(letter); }
+      else { const letter=document.createElement('span'); letter.className='sv-story-letter'; letter.textContent=(story.text||'S').slice(0,1).toUpperCase(); ring.appendChild(letter); }
+      const label=document.createElement('span'); label.textContent=story.username || 'You'; item.append(ring,label);
+      item.addEventListener('click', () => showStoryViewer(story)); host.appendChild(item);
+    });
+  }
+  function addStory() {
+    if (!window.currentUser) { alert('पहले Login करें।'); return; }
+    const picker = document.getElementById('svStoryFilePicker');
+    if (picker) { picker.value=''; picker.click(); }
+    else alert('Story upload का विकल्प नहीं मिला।');
+  }
+  async function handleStoryFile(file) {
+    if (!file || !window.currentUser) return;
+    const isImage=file.type.startsWith('image/'), isVideo=file.type.startsWith('video/');
+    if (!isImage && !isVideo) { alert('कृपया फोटो या वीडियो चुनें।'); return; }
+    if (file.size > 50*1024*1024) { alert('Story फ़ाइल 50 MB से छोटी चुनें।'); return; }
+    const key='story_'+(window.currentUser.id||'user')+'_'+Date.now();
+    if (isVideo) {
+      const tempUrl=URL.createObjectURL(file); const probe=document.createElement('video'); probe.preload='metadata'; probe.src=tempUrl;
+      probe.onloadedmetadata=async()=>{
+        URL.revokeObjectURL(tempUrl);
+        if (!Number.isFinite(probe.duration) || probe.duration > 15.05) { alert('Story वीडियो 15 सेकंड या उससे छोटी होनी चाहिए।'); return; }
+        await storeStoryFile(file,key,'video');
+      };
+      probe.onerror=()=>{URL.revokeObjectURL(tempUrl);alert('यह वीडियो पढ़ी नहीं जा सकी। दूसरी वीडियो चुनें।');};
+    } else await storeStoryFile(file,key,'image');
+  }
+  async function storeStoryFile(file,key,type) {
+    try {
+      await saveStoryBlob(key,file);
+      const stories=safeRead(userKey('stories'),[]);
+      stories.push({id:String(Date.now()),mediaKey:key,type,username:window.currentUser.user_metadata?.display_name||'You',text:'',createdAt:Date.now()});
+      if(safeWrite(userKey('stories'),stories)){await renderStories();alert('आपकी Story जोड़ दी गई। यह 24 घंटे तक इस डिवाइस पर रहेगी।');}
+    } catch(e) { alert('Story सेव नहीं हुई। कृपया जगह खाली करके फिर कोशिश करें।'); }
+  }
+  window.shortVibeShareReelToStory = async function(item, videoUrl) {
+    if (!window.currentUser) { alert('पहले Login करें।'); return; }
+    const stories=safeRead(userKey('stories'),[]);
+    stories.push({id:String(Date.now()),videoUrl,type:'video',username:window.currentUser.user_metadata?.display_name||'You',text:'Reel: @'+(item.username||'ShortVibe User'),createdAt:Date.now()});
+    if(safeWrite(userKey('stories'),stories)){await renderStories();alert('Reel आपकी Story में जोड़ दी गई।');}
+  };
+  const storyPicker=document.getElementById('svStoryFilePicker');
+  if(storyPicker) storyPicker.addEventListener('change',function(){const file=this.files&&this.files[0];if(file)handleStoryFile(file);});
+
+  function renderMessages() {
+    const host=$('svMessageList'); if(!host) return; host.replaceChildren();
+    const messages=safeRead(userKey('messages'), []);
+    if (!messages.length) { host.textContent='अभी कोई Message नहीं है।'; return; }
+    messages.forEach(m => { const el=document.createElement('div'); el.className='sv-message'; el.textContent=m.text; const small=document.createElement('small'); small.textContent=new Date(m.createdAt).toLocaleString(); el.appendChild(small); host.appendChild(el); });
+    host.scrollTop=host.scrollHeight;
+  }
+  function openMessages() {
+    if (!window.currentUser) { alert('Messages के लिए पहले Login करें।'); return; }
+    [feedPanel, profilePanel, $('uploadPanel'), $('settingsPanel')].forEach(el=>el&&el.classList.add('hidden'));
+    messagesPanel.classList.remove('hidden'); setHomeOnlyNav('messages'); renderMessages(); window.scrollTo(0,0);
+  }
+  window.shortVibeOpenMessages = openMessages;
+
+  function goHome() {
+    messagesPanel && messagesPanel.classList.add('hidden');
+    if (typeof window.shortVibeOpenPage === 'function') window.shortVibeOpenPage('home');
+    setHomeOnlyNav('home'); renderStories(); window.scrollTo(0,0);
+  }
+
+  $('svOpenMessages')?.addEventListener('click', openMessages);
+  $('svAddStory')?.addEventListener('click', addStory);
+  $('svProfileSettingsBtn')?.addEventListener('click', function () {
+    if (!window.currentUser) { alert('Settings के लिए पहले Login करें।'); return; }
+    if (profilePanel) profilePanel.classList.add('hidden');
+    if (feedPanel) feedPanel.classList.add('hidden');
+    const upload = $('uploadPanel'); if (upload) upload.classList.add('hidden');
+    const settings = $('settingsPanel'); if (settings) settings.classList.remove('hidden');
+    if (messagesPanel) messagesPanel.classList.add('hidden');
+    setHomeOnlyNav('settings'); window.scrollTo(0, 0);
+  });
+  $('svSettingsBack')?.addEventListener('click', function () {
+    const settings = $('settingsPanel'); if (settings) settings.classList.add('hidden');
+    if (profilePanel) profilePanel.classList.remove('hidden');
+    setHomeOnlyNav('profile'); window.scrollTo(0, 0);
+  });
+  document.querySelectorAll('[data-sv-page]').forEach(b=>b.addEventListener('click',()=>{
+    if(!window.currentUser){alert('पहले Login करें।');return;}
+    if(window.shortVibeOpenPage) window.shortVibeOpenPage(b.dataset.svPage);
+  }));
+  $('svSendMessage')?.addEventListener('click', function(){
+    const input=$('svMessageInput'); const text=input.value.trim(); if(!text) return;
+    const messages=safeRead(userKey('messages'), []); messages.push({text,createdAt:Date.now()});
+    if(safeWrite(userKey('messages'),messages)){input.value='';renderMessages();}
+  });
+  $('svMessageInput')?.addEventListener('keydown', e=>{if(e.key==='Enter') $('svSendMessage').click();});
+  document.querySelectorAll('[data-sv-back]').forEach(el=>el.addEventListener('click',goHome));
+
+  // Instagram-like pull-to-refresh: start at the top and drag down.
+  let pullStartY=null, pullArmed=false;
+  const pullHint=$('svPullRefreshHint');
+  document.addEventListener('touchstart',function(e){
+    if (!document.body.classList.contains('sv-home-page') || window.scrollY>4 || !feedPanel || feedPanel.classList.contains('hidden')) { pullStartY=null; return; }
+    pullStartY=e.touches && e.touches[0] ? e.touches[0].clientY : null; pullArmed=false;
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(pullStartY===null || !e.touches || !e.touches[0]) return;
+    const delta=e.touches[0].clientY-pullStartY;
+    if(delta>35 && window.scrollY<=4){pullArmed=true;if(pullHint){pullHint.style.display='block';pullHint.textContent=delta>85?'↑ छोड़ें, Feed Refresh होगी':'↓ नीचे खींचें और छोड़ें';}}
+  },{passive:true});
+  document.addEventListener('touchend',async function(e){
+    const shouldRefresh=pullArmed && pullStartY!==null;
+    pullStartY=null;pullArmed=false;
+    if(pullHint){pullHint.style.display=shouldRefresh?'block':'none';if(shouldRefresh)pullHint.textContent='Feed Refresh हो रही है…';}
+    if(shouldRefresh && typeof loadFeed==='function'){
+      try{await loadFeed();}finally{if(pullHint)setTimeout(()=>{pullHint.style.display='none';},900);}
+    }
+  },{passive:true});
+
+  $('svProfilePhotoInput')?.addEventListener('change', function(){
+    const file=this.files && this.files[0]; if(!file) return;
+    if(!file.type.startsWith('image/')) { alert('कृपया image चुनें।'); return; }
+    if(file.size > 1500000) { alert('Profile photo 1.5 MB से छोटी रखें।'); return; }
+    const reader=new FileReader(); reader.onload=()=>{ try { localStorage.setItem(userKey('profile_photo'),reader.result); $('svProfilePhoto').src=reader.result; } catch(_){alert('Photo सेव नहीं हुई। छोटी image चुनें।');} }; reader.readAsDataURL(file);
+  });
+  $('svCollabSend')?.addEventListener('click', function(){
+    const username=$('svCollabUser').value.trim(); const text=$('svCollabText').value.trim(); if(!username||!text){alert('Username और संदेश दोनों भरें।');return;}
+    const list=safeRead(userKey('collabs'),[]); list.push({username,text,createdAt:Date.now()}); safeWrite(userKey('collabs'),list); $('svCollabUser').value=''; $('svCollabText').value=''; alert('Collaboration request इसी डिवाइस पर सेव हुई। इसे दूसरे यूज़र को नहीं भेजा गया है।');
+  });
+
+  function applyProfileTab(tab) {
+    currentProfileTab=tab;
+    document.querySelectorAll('[data-profile-tab]').forEach(b=>b.classList.toggle('active',b.dataset.profileTab===tab));
+    const info=$('svProfileTabInfo'), collab=$('svCollabPanel'), profilePosts=$('svProfilePosts');
+    if(collab) collab.classList.toggle('hidden',tab!=='collab');
+    if(profilePosts) profilePosts.classList.toggle('hidden',tab==='collab');
+    const cards=Array.from(document.querySelectorAll('#feed .feed-card'));
+    cards.forEach(card=>{ card.style.display=''; });
+    if(profilePosts) profilePosts.replaceChildren();
+    if(info) info.textContent = tab==='posts' ? 'आपकी पोस्ट / वीडियो यहाँ दिखेंगी।' : tab==='reels' ? 'आपकी Reels यहाँ दिखेंगी।' : 'Collaboration अनुरोध लिखें।';
+    if(tab==='collab') return;
+    const ownCards=cards.filter(card=>window.currentUser && (card.dataset.userId||'')===window.currentUser.id);
+    ownCards.forEach(card=>{
+      const copy=card.cloneNode(true);
+      copy.style.cssText='position:relative;min-height:0;height:auto;margin:10px 0;padding:10px;border-radius:12px;overflow:hidden;';
+      const v=copy.querySelector('video'); if(v){v.controls=true;v.autoplay=false;v.style.cssText='width:100%;height:auto;max-height:55vh;object-fit:contain;position:static;';}
+      const actions=copy.querySelector('.sv-reel-actions'); if(actions) actions.style.cssText='display:flex;flex-wrap:wrap;gap:6px;position:static;width:100%;';
+      const comments=copy.querySelector('.comments-section'); if(comments) comments.remove();
+      const menu=copy.querySelector('.sv-video-options-wrap'); if(menu) menu.remove();
+      const back=copy.querySelector('.sv-reel-back'); if(back) back.remove();
+      profilePosts.appendChild(copy);
+    });
+    if(!ownCards.length && info) info.textContent='अभी आपकी कोई पोस्ट/वीडियो नहीं मिली। पहले Upload करें।';
+  }
+  document.querySelectorAll('[data-profile-tab]').forEach(b=>b.addEventListener('click',()=>applyProfileTab(b.dataset.profileTab)));
+
+  // Preserve the existing page router but make the bottom navigation appear only on Home.
+  const originalOpenPage=window.shortVibeOpenPage;
+  if(originalOpenPage) window.shortVibeOpenPage=function(page){
+    messagesPanel && messagesPanel.classList.add('hidden');
+    originalOpenPage(page);
+    setHomeOnlyNav(page);
+    if(page==='home') { renderStories(); document.querySelectorAll('#feed .feed-card').forEach(c=>c.style.display=''); }
+    if(page==='profile') {
+      const photo=localStorage.getItem(userKey('profile_photo'));
+      if($('svProfilePhoto') && photo) $('svProfilePhoto').src=photo;
+      applyProfileTab('posts');
+    }
+  };
+
+  // Ensure feed cards can be filtered to the signed-in user's own uploads.
+  const observer=new MutationObserver(()=>{
+    document.querySelectorAll('#feed .feed-card').forEach(card=>{
+      if(!card.dataset.userId){
+        const name=(card.querySelector('p')?.textContent||'').replace(/^@/,'');
+        card.dataset.username=name;
+      }
+    });
+  });
+  if($('feed')) observer.observe($('feed'),{childList:true,subtree:true});
+  const originalMessage=window.message;
+  document.addEventListener('DOMContentLoaded',()=>{renderStories(); if(window.currentUser) setHomeOnlyNav('home');});
+  // Make sure a sign-in state shows Home navigation, and logout hides all private panels.
+  window.addEventListener('shortvibe-auth-change',()=>{
+    if(window.currentUser){
+      setTimeout(()=>{ if(window.shortVibeOpenPage && !messagesPanel?.classList.contains('hidden')) return; setHomeOnlyNav('home'); renderStories(); },100);
+    } else {
+      document.body.classList.remove('sv-home-page');
+      if(nav) nav.style.display='none';
+      messagesPanel && messagesPanel.classList.add('hidden');
+    }
+  });
+})();
+</script>
+
+
+<!-- Global Back-to-Home control: leaves the existing bottom navigation unchanged. -->
+<style id="sv-global-back-style">
+  #svGlobalBackHome {
+    position: fixed !important;
+    top: max(12px, env(safe-area-inset-top, 0px)) !important;
+    left: 12px !important;
+    z-index: 200000 !important;
+    display: none;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    border: 1px solid rgba(255,255,255,.24) !important;
+    border-radius: 50% !important;
+    background: rgba(25,25,32,.88) !important;
+    color: #fff !important;
+    font-size: 30px !important;
+    line-height: 1 !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25) !important;
+  }
+  body:not(.sv-home-page) #svGlobalBackHome { display: flex !important; }
+  body.sv-home-page #svGlobalBackHome { display: none !important; }
+  body.sv-comments-open #svGlobalBackHome { display: none !important; }
+</style>
+<button id="svGlobalBackHome" type="button" aria-label="Back to Home" title="Back to Home">‹</button>
+<script id="sv-global-back-handler">
+(function () {
+  const back = document.getElementById('svGlobalBackHome');
+  if (!back) return;
+  back.addEventListener('click', function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (document.body.classList.contains('sv-comments-open')) return;
+    if (typeof window.shortVibeOpenPage === 'function') {
+      window.shortVibeOpenPage('home');
+    } else {
+      document.body.classList.remove('reels-mode');
+      document.body.classList.add('sv-home-page');
+      const nav = document.getElementById('bottomNav');
+      if (nav) nav.style.display = 'grid';
+      ['profilePanel','uploadPanel','settingsPanel','svMessagesPanel'].forEach(function (id) {
+        const panel = document.getElementById(id);
+        if (panel) panel.classList.add('hidden');
+      });
+      const feedPanel = document.getElementById('feedPanel');
+      if (feedPanel) feedPanel.classList.remove('hidden');
+    }
+    window.scrollTo(0, 0);
+  });
+})();
+</script>
+
+<style id="sv-restore-normal-start">
+  #svIntro { display:flex !important; }
+  #svIntro.svIntroHide { display:flex !important; opacity:0 !important; visibility:hidden !important; pointer-events:none !important; }
+  body > header { display:block; }
+</style>
+
+</body>
+</html>
+
+<style>
+/* Keep the earlier full neon intro, with the logo, title, tagline and progress bar. */
+#svIntro .svLogo { display:flex !important; }
+#svIntro .svTagline, #svIntro .svLoader { display:block !important; }
+#svIntro .svTitle { margin-top:34px !important; font-size:clamp(34px, 9vw, 48px) !important; font-weight:900 !important; letter-spacing:-1px !important; transform:perspective(500px) rotateX(8deg); text-shadow:2px 3px 0 #7b1b80, 4px 6px 0 #153f80, 0 0 24px #ff168f, 0 0 38px #00d9ff !important; }
+header { font-weight:900; }
+.sv-home-tools { display:none !important; }
+/* Keep all six navigation actions on one fixed horizontal strip. */
+#bottomNav { display:none !important; grid-template-columns:repeat(6,minmax(0,1fr)) !important; flex-wrap:nowrap !important; }
+body.sv-home-page #bottomNav { display:grid !important; }
+#bottomNav button { min-width:0 !important; white-space:nowrap !important; }
+</style>
+
+<style>
+/* Give the persistent top wordmark a subtle 3D neon look; text only. */
+body > header { color:#ff3867 !important; font-weight:900 !important; letter-spacing:-.5px; text-shadow:2px 2px 0 #7d1b52, 4px 4px 0 #34204f, 0 0 12px rgba(255,56,103,.35) !important; }
+</style>
